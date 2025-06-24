@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 import messages 
 
 IS_CHOOSING_LANGUAGE=1
-NEXT_STATE=2
+IS_CHOOSING_ACTION=2
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -46,4 +46,16 @@ async def while_choosing_language(update: Update, context: ContextTypes.DEFAULT_
         chat_id=update.effective_chat.id,  
         text=messages.USER_LANGUAGE[choosen_language] % choosen_language  
     )
-    return NEXT_STATE
+    keyboard = [
+        [
+            InlineKeyboardButton(messages.REMOVE_NOISE[user_language], callback_data="remove_noise"),
+            InlineKeyboardButton(messages.GENERATE_IMAGE[user_language], callback_data="generate_image"),
+            InlineKeyboardButton(messages.VIEW_HISTORY[user_language], callback_data="view_history"),
+            InlineKeyboardButton("✨ "+ messages.MAGIC[user_language] + " ✨", callback_data="magic"),
+        ],
+    ]
+
+    await context.bot.send_message(
+        update.effective_chat.id, messages.CHOOSE_SCENARIO[user_language], reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+    return IS_CHOOSING_ACTION

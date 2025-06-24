@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ConversationHandler
-from start import start, IS_CHOOSING_LANGUAGE, NEXT_STATE
+from start import start, while_choosing_language, IS_CHOOSING_LANGUAGE, IS_CHOOSING_ACTION
 
 load_dotenv()
 
@@ -14,7 +14,10 @@ def main():
         app_builder = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
         states = {
             IS_CHOOSING_LANGUAGE: [
-                CallbackQueryHandler(choosing_language, pattern="^bot_language"),
+                CallbackQueryHandler(while_choosing_language, pattern="^bot_language"),
+            ],
+            IS_CHOOSING_ACTION: [
+                CallbackQueryHandler(while_choosing_action, pattern="^bot_action"),
             ],
         }
 
