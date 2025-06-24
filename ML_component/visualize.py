@@ -43,3 +43,32 @@ def show_results(original: np.ndarray, damaged: np.ndarray, recovered: np.ndarra
     plt.suptitle("Результат восстановления изображения методом ADMM", fontsize=16)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Корректируем расположение, чтобы заголовок не накладывался
     plt.show()
+
+
+def plot_convergence(norm_histories: list, titles: list, colors: list):
+    """
+    Строит графики сходимости ядерной нормы для каждого канала в логарифмическом масштабе.
+
+    Args:
+        norm_histories (list): Список списков, где каждый внутренний список - история ядерной нормы для одного канала.
+        titles (list): Список заголовков для каждого графика (например, имена каналов).
+        colors (list): Список цветов для каждого графика.
+    """
+    if not (len(norm_histories) == len(titles) == len(colors)):
+        raise ValueError("Длины списков должны совпадать")
+
+    num_plots = len(norm_histories)
+    plt.figure(figsize=(5 * num_plots, 5))
+
+    for i, history in enumerate(norm_histories):
+        plt.subplot(1, num_plots, i + 1)
+        plt.plot(history, color=colors[i], linewidth=2)
+        plt.title(f"Сходимость ({titles[i]})")
+        plt.xlabel("Итерация")
+        plt.ylabel("Ядерная норма")
+        plt.yscale("log")  # Логарифмическая шкала для лучшей наглядности на начальных этапах
+        plt.grid(True, which="both", linestyle='--', linewidth=0.5)
+
+    plt.suptitle("Сходимость алгоритма по каналам", fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.show()
