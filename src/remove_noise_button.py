@@ -7,12 +7,19 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, constan
 from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, filters
 #from database import save_image_to_db, get_image_from_db  # Измненить на наши функции обработки 
 #from image_processor import process_image  #Изменить на бота обработки изображений
-import message
+import messages
 
 IMAGE_PROCESSING_BASE = 20
 AWAITING_IMAGE_UPLOAD = IMAGE_PROCESSING_BASE + 0
 PROCESSING_IMAGE = IMAGE_PROCESSING_BASE + 1
 IMAGE_RESULT_READY = IMAGE_PROCESSING_BASE + 2
+
+def generate_image(): 
+    pass
+def view_history(): 
+    pass
+def magic():
+    pass
 
 async def remove_noise(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -91,17 +98,12 @@ async def show_image_result_options(update: Update, context: ContextTypes.DEFAUL
     bot_language = context.user_data["bot_language"]
     
     keyboard = [
-        [
-            InlineKeyboardButton(
-                messages.PROCESS_ANOTHER_IMAGE[bot_language], 
-                callback_data="process_image"
-            ),
-            InlineKeyboardButton(
-                messages.BACK_TO_MENU[bot_language], 
-                callback_data="back_to_menu"
-            )
-        ]
+            [InlineKeyboardButton(messages.REMOVE_NOISE[bot_language], callback_data="remove_noise")],
+            [InlineKeyboardButton(messages.GENERATE_IMAGE[bot_language], callback_data="generate_image")],
+            [InlineKeyboardButton(messages.VIEW_HISTORY[bot_language], callback_data="view_history")],
+            [InlineKeyboardButton("✨ "+ messages.MAGIC[bot_language] + " ✨", callback_data="magic")],
     ]
+    
     
     await context.bot.send_message(
         chat_id=update.effective_chat.id,

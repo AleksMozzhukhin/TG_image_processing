@@ -15,12 +15,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     keyboard = [
         [
-            InlineKeyboardButton("English", callback_data="interface_language_en"),
-            InlineKeyboardButton("Русский", callback_data="interface_language_ru"),
+            InlineKeyboardButton("English", callback_data="bot_language_en"),
+            InlineKeyboardButton("Русский", callback_data="bot_language_ru"),
         ],
     ]
+    reply_markup=InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
-        update.effective_chat.id, "Select language for the bot\nВыберите язык для бота", reply_markup=InlineKeyboardMarkup(keyboard)
+        update.effective_chat.id, "Select language for the bot\nВыберите язык для бота", reply_markup=reply_markup
 
     )
     return IS_CHOOSING_LANGUAGE
@@ -47,15 +48,14 @@ async def while_choosing_language(update: Update, context: ContextTypes.DEFAULT_
         text=messages.USER_LANGUAGE[choosen_language] % choosen_language  
     )
     keyboard = [
-        [
-            InlineKeyboardButton(messages.REMOVE_NOISE[user_language], callback_data="remove_noise"),
-            InlineKeyboardButton(messages.GENERATE_IMAGE[user_language], callback_data="generate_image"),
-            InlineKeyboardButton(messages.VIEW_HISTORY[user_language], callback_data="view_history"),
-            InlineKeyboardButton("✨ "+ messages.MAGIC[user_language] + " ✨", callback_data="magic"),
-        ],
+            [InlineKeyboardButton(messages.REMOVE_NOISE[choosen_language], callback_data="remove_noise")],
+            [InlineKeyboardButton(messages.GENERATE_IMAGE[choosen_language], callback_data="generate_image")],
+            [InlineKeyboardButton(messages.VIEW_HISTORY[choosen_language], callback_data="view_history")],
+            [InlineKeyboardButton("✨ "+ messages.MAGIC[choosen_language] + " ✨", callback_data="magic")],
     ]
-
+    
+    reply_markup=InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
-        update.effective_chat.id, messages.CHOOSE_SCENARIO[user_language], reply_markup=InlineKeyboardMarkup(keyboard)
+        update.effective_chat.id, messages.CHOOSE_SCENARIO[choosen_language], reply_markup=reply_markup
     )
     return IS_CHOOSING_ACTION
