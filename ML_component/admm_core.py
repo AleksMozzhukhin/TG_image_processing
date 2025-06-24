@@ -18,12 +18,11 @@ def MC_update_X(Z: np.ndarray, lambda_: np.ndarray, r: float) -> np.ndarray:
     u, s, vt = np.linalg.svd(matrix_to_decompose, full_matrices=False)
 
     # Пороговое сжатие (soft-thresholding) сингулярных чисел
+    matrix_to_decompose = Z - lambda_ / r
+    u, s, vt = np.linalg.svd(matrix_to_decompose, full_matrices=False)
     threshold = 1.0 / r
     s_thresholded = np.maximum(s - threshold, 0)
-
-    # Собираем матрицу обратно
     return u @ np.diag(s_thresholded) @ vt
-
 
 def MC_update_Z(X: np.ndarray, lambda_: np.ndarray, r: float, Y: np.ndarray, mask: np.ndarray) -> np.ndarray:
     """
@@ -47,3 +46,59 @@ def MC_update_Z(X: np.ndarray, lambda_: np.ndarray, r: float, Y: np.ndarray, mas
     Z_new[mask] = Y[mask]
 
     return Z_new
+
+
+def MC_ADMM(Y: np.ndarray, mask: np.ndarray, tol: float, max_iters: int, r: float) -> tuple[np.ndarray, list]:
+    """
+    Решает задачу матричного дозаполнения с помощью ADMM, управляя итерационным процессом.
+
+    Args:
+        Y (np.ndarray): Исходная матрица (канал изображения) с пропусками.
+        mask (np.ndarray): Булева маска, где True - известные элементы.
+        tol (float): Порог для критерия остановки (изменение ядерной нормы).
+        max_iters (int): Максимальное количество итераций.
+        r (float): Параметр rho для ADMM.
+
+    Returns:
+        tuple[np.ndarray, list]: Кортеж из восстановленной матрицы X и истории ядерной нормы.
+    """
+    height, width = Y.shape
+
+    # Инициализация переменных
+    X = np.random.rand(height, width)
+    Z = np.random.rand(height, width)
+    lambda_ = np.zeros_like(Y)
+
+    # Начальная проекция, чтобы Z с самого начала удовлетворял ограничениям
+    Z[mask] = Y[mask]
+
+    # Инициализация истории для отслеживания сходимости
+    u, s, v = np.linalg.svd(X, compute_uv=True)
+    norm_prev = np.sum(s)
+    norms_history = [norm_prev]
+
+    for i in range(max_iters):
+        # Шаг 1: Обновление X (SVT)
+        X = MC_update_X(Z, lambda_, r)
+
+        # Шаг 2: Обновление Z (Проекция)
+        Z = MC_update_Z(X, lambda_, r, Y, mask)
+
+        # Шаг 3: Обновление двойственной переменной
+        lambda_ += (X - Z) * r
+
+        # Проверка сходимости по изменению ядерной нормы
+        u, s, v = np.linalg.svd(X, compute_uv=True)
+        norm_current = np.sum(s)
+        norms_history.append(norm_current)
+
+        if np.abs(norm_current - norm_prev) < tol:
+            print(f"Сходимость достигнута на итерации {i + 1}.")
+            break
+
+        norm_prev = norm_current
+
+    if i == max_iters - 1:
+        print("Достигнуто максимальное количество итераций.")
+
+    return X, norms_history
