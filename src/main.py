@@ -3,9 +3,16 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ConversationHandler
 from start import start, while_choosing_language, IS_CHOOSING_LANGUAGE, IS_CHOOSING_ACTION
-import actions 
+from remove_noise_button import remove_noise, image_processing_states
 
 load_dotenv()
+
+def generate_image(): 
+    pass
+def view_history(): 
+    pass
+def magic():
+    pass
 
 def main():
     if not (TELEGRAM_TOKEN := os.getenv("TELEGRAM_BOT_TOKEN")): 
@@ -31,7 +38,7 @@ def main():
             states=states, 
             fallbacks=[CommandHandler("start", start)], 
         )
-        application.add_handler(handler)
+        app_builder.add_handler(handler)
         app_builder.run_polling()
 
 if __name__ == "__main__":
