@@ -9,11 +9,14 @@ from aiogram import Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.bot import DefaultBotProperties
 
+from routers.all_routers import all_routers
+
 load_dotenv()
 
 async def main():
     """Создание базой конфигурации бота"""
     dispatcher = Dispatcher()
+    dispatcher.include_router(all_routers)
     #добавить код, когда будет готова бд
     db_instance = db_scripts.DataBase()
     if not (TELEGRAM_TOKEN := os.getenv("TELEGRAM_BOT_TOKEN")): 
