@@ -1,18 +1,26 @@
-import cupy as np
+from typing import Union, List, Tuple, Type
+from .utils import ArrayLike, BackendModule
+import numpy
+
+try:
+    import cupy
+except ImportError:
+    pass
 
 
-def MC_update_X(Z: np.ndarray, lambda_: np.ndarray, r: float) -> np.ndarray:
+def MC_update_X(Z: ArrayLike, lambda_: ArrayLike, r: float, np: BackendModule) -> ArrayLike:
     """
     Шаг обновления низкоранговой матрицы X через пороговое сжатие сингулярных чисел (SVT).
     Это соответствует решению задачи: argmin_X ||X||_* + (r/2)||X - Z + U||^2_F
 
     Args:
-        Z (np.ndarray): Текущая оценка матрицы, удовлетворяющей ограничениям.
-        lambda_ (np.ndarray): Двойственная переменная (масштабированная).
+        Z (ArrayLike): Текущая оценка матрицы, удовлетворяющей ограничениям.
+        lambda_ (ArrayLike): Двойственная переменная (масштабированная).
         r (float): Параметр rho для ADMM, контролирующий штраф.
+        np (BackendModule): Вычислительный бэкенд (модуль numpy или cupy).
 
     Returns:
-        np.ndarray: Обновленная низкоранговая матрица X.
+        ArrayLike: Обновленная низкоранговая матрица X того же типа, что и входные.
     """
     matrix_to_decompose = Z - lambda_ / r
     u, s, vt = np.linalg.svd(matrix_to_decompose, full_matrices=False)
@@ -24,20 +32,20 @@ def MC_update_X(Z: np.ndarray, lambda_: np.ndarray, r: float) -> np.ndarray:
     return u @ np.diag(s_thresholded) @ vt
 
 
-def MC_update_Z(X: np.ndarray, lambda_: np.ndarray, r: float, Y: np.ndarray, mask: np.ndarray) -> np.ndarray:
+def MC_update_Z(X: ArrayLike, lambda_: ArrayLike, r: float, Y: ArrayLike, mask: ArrayLike) -> ArrayLike:
     """
     Шаг обновления матрицы Z, удовлетворяющей ограничениям на известные пиксели.
     Это соответствует проекции на множество матриц, совпадающих с Y на маске E.
 
     Args:
-        X (np.ndarray): Текущая оценка низкоранговой матрицы.
-        lambda_ (np.ndarray): Двойственная переменная.
+        X (ArrayLike): Текущая оценка низкоранговой матрицы.
+        lambda_ (ArrayLike): Двойственная переменная.
         r (float): Параметр rho для ADMM.
-        Y (np.ndarray): Исходная матрица с пропусками (используется для известных значений).
-        mask (np.ndarray): Булева маска, где True - известные элементы.
+        Y (ArrayLike): Исходная матрица с пропусками (используется для известных значений).
+        mask (ArrayLike): Булева маска, где True - известные элементы.
 
     Returns:
-        np.ndarray: Обновленная матрица Z.
+        ArrayLike: Обновленная матрица Z.
     """
     # Сначала вычисляем временную матрицу
     Z_new = X + lambda_ / r
@@ -48,20 +56,26 @@ def MC_update_Z(X: np.ndarray, lambda_: np.ndarray, r: float, Y: np.ndarray, mas
     return Z_new
 
 
-def MC_ADMM(Y: np.ndarray, mask: np.ndarray, tol: float, max_iters: int, r: float) -> tuple[np.ndarray, list]:
+def MC_ADMM(Y: ArrayLike, mask: ArrayLike, tol: float, max_iters: int, r: float, backend: BackendModule) -> Tuple[
+    ArrayLike, List[float]]:
     """
     Решает задачу матричного дозаполнения с помощью ADMM, управляя итерационным процессом.
 
     Args:
-        Y (np.ndarray): Исходная матрица (канал изображения) с пропусками.
-        mask (np.ndarray): Булева маска, где True - известные элементы.
+        Y (ArrayLike): Исходная матрица (канал изображения) с пропусками.
+        mask (ArrayLike): Булева маска, где True - известные элементы.
         tol (float): Порог для критерия остановки (изменение ядерной нормы).
         max_iters (int): Максимальное количество итераций.
         r (float): Параметр rho для ADMM.
+        backend (BackendModule): Вычислительный бэкенд для всех операций (модуль numpy или cupy).
 
     Returns:
-        tuple[np.ndarray, list]: Кортеж из восстановленной матрицы X и истории ядерной нормы.
+        Tuple[ArrayLike, List[float]]: Кортеж, содержащий:
+            - Восстановленную матрицу X (на том же бэкенде, что и входные данные).
+            - Историю значений ядерной нормы (список чисел float).
     """
+    np = backend
+
     height, width = Y.shape
 
     # Инициализация переменных
@@ -74,12 +88,12 @@ def MC_ADMM(Y: np.ndarray, mask: np.ndarray, tol: float, max_iters: int, r: floa
 
     # Инициализация истории для отслеживания сходимости
     u, s, v = np.linalg.svd(X, compute_uv=True)
-    norm_prev = np.sum(s).item()
+    norm_prev = np.sum(s).get().item() if hasattr(s, 'get') else np.sum(s).item()
     norms_history = [norm_prev]
 
     for i in range(max_iters):
         # Шаг 1: Обновление X (SVT)
-        X = MC_update_X(Z, lambda_, r)
+        X = MC_update_X(Z, lambda_, r, np)
 
         # Шаг 2: Обновление Z (Проекция)
         Z = MC_update_Z(X, lambda_, r, Y, mask)
@@ -89,8 +103,8 @@ def MC_ADMM(Y: np.ndarray, mask: np.ndarray, tol: float, max_iters: int, r: floa
 
         # Проверка сходимости по изменению ядерной нормы
         u, s, v = np.linalg.svd(X, compute_uv=True)
-        # ИСПРАВЛЕНО: Преобразуем скаляр CuPy в число Python
-        norm_current = np.sum(s).item()
+
+        norm_current = np.sum(s).get().item() if hasattr(s, 'get') else np.sum(s).item()
         norms_history.append(norm_current)
 
         # abs() для обычных чисел Python, np.abs() для массивов
@@ -99,6 +113,7 @@ def MC_ADMM(Y: np.ndarray, mask: np.ndarray, tol: float, max_iters: int, r: floa
             break
 
         norm_prev = norm_current
+
     else:
         print("Достигнуто максимальное количество итераций.")
 
