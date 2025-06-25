@@ -9,6 +9,7 @@ from aiogram import Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.bot import DefaultBotProperties
 
+from db import db_scripts, db_wares
 from routers.all_routers import all_routers
 
 load_dotenv()
@@ -17,8 +18,9 @@ async def main():
     """Создание базой конфигурации бота"""
     dispatcher = Dispatcher()
     dispatcher.include_router(all_routers)
-    #добавить код, когда будет готова бд
-    db_instance = db_scripts.DataBase()
+    #Разкомментить на девелопе и прочекать 
+    #db_instance = db_scripts.DataBase()
+    #dp.update.middleware(db_wares.DatabaseWares(db=db_instance))
     if not (TELEGRAM_TOKEN := os.getenv("TELEGRAM_BOT_TOKEN")): 
         print("Telegram token not found! Install telegram token!")
         sys.exit(1)
