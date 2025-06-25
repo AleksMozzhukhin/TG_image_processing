@@ -4,10 +4,10 @@ import psycopg
 from dataclasses import dataclass
 from datetime import datetime
 from psycopg.rows import class_row
+"""
 from dotenv import load_dotenv
-
-
 load_dotenv()
+"""
 
 @dataclass
 class Image:
@@ -25,6 +25,7 @@ class Database:
 
     def __init__(self):
         """Configure database."""
+        """
         self.conn = psycopg.connect(
             dbname=os.getenv("DB_NAME"),
             user=os.getenv("DB_USER"),
@@ -39,7 +40,8 @@ class Database:
             password=os.environ["DB_PASS"],
             host=os.environ["DB_HOST"],
             port=os.environ["DB_PORT"]
-        )"""
+        )
+
 
     def add_image(self, user_id, request, image, date) -> None:
         """Add a new image to the database."""
