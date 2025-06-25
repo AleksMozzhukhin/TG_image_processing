@@ -1,45 +1,37 @@
 import os
+import asyncio
+import logging
+import sys
 from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ConversationHandler
-from start import start, while_choosing_language, IS_CHOOSING_LANGUAGE, IS_CHOOSING_ACTION
-from remove_noise_button import remove_noise, image_processing_states
+
+from aiogram import Bot
+from aiogram import Dispatcher
+from aiogram.enums import ParseMode
+from aiogram.client.bot import DefaultBotProperties
 
 load_dotenv()
 
-def generate_image(): 
-    pass
-def view_history(): 
-    pass
-def magic():
-    pass
-
-def main():
+async def main():
+    """Создание базой конфигурации бота"""
+    dispatcher = Dispatcher()
+    #добавить код, когда будет готова бд
+    db_instance = db_scripts.DataBase()
     if not (TELEGRAM_TOKEN := os.getenv("TELEGRAM_BOT_TOKEN")): 
         print("Telegram token not found! Install telegram token!")
-    else: 
-        app_builder = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-        states = {
-            IS_CHOOSING_LANGUAGE: [
-                CallbackQueryHandler(while_choosing_language, pattern="^bot_language"),
-            ],
-            IS_CHOOSING_ACTION: [
-                CallbackQueryHandler(remove_noise, pattern="^remove_noise"),
-                CallbackQueryHandler(generate_image, pattern="^generate_image"),
-                CallbackQueryHandler(view_history, pattern="^view_history"),
-                CallbackQueryHandler(magic, pattern="^magic"),
-            ],
-        }
-
-        states |= image_processing_states
-
-        handler = ConversationHandler(
-            entry_points=[CommandHandler("start", start)],
-            states=states, 
-            fallbacks=[CommandHandler("start", start)], 
+        sys.exit(1)
+    bot = Bot(
+        token=TELEGRAM_TOKEN,
+        default=DefaultBotProperties(
+            parse_mode=ParseMode.HTML
         )
-        app_builder.add_handler(handler)
-        app_builder.run_polling()
+    )
+    await dispatcher.start_polling(bot)
+
 
 if __name__ == "__main__":
-    main()
+    logging.basicConfig(
+        level=logging.INFO,
+        stream=sys.stdout,
+        format="%(asctime)s - [%(levelname)s] -  %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"  # noqa: E501
+    )
+    asyncio.run(main())
