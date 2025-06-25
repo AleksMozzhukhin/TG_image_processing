@@ -1,28 +1,49 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-import cupy as cp
+from typing import List
+from .utils import ArrayLike, _ensure_numpy
+
+try:
+    import cupy as cp
+
+except ImportError:
+    cp = None
 
 
-def _ensure_numpy(array: np.ndarray or cp.ndarray) -> np.ndarray:
-    """Вспомогательная функция, которая гарантирует, что массив является NumPy массивом."""
-    if isinstance(array, cp.ndarray):
-        return cp.asnumpy(array)
-    return array
+def show_image(ax: plt.Axes, image: ArrayLike, title: str = "", grid: bool = False):
+    """
+    Отображает одно изображение на предоставленной оси matplotlib.Axes.
+    Автоматически конвертирует CuPy массив в NumPy, если необходимо.
 
-
-def show_image(ax, image: np.ndarray, title: str = "", grid: bool = False):
-    """Отображает одно изображение на предоставленной оси (Axes)."""
+    Args:
+        ax (plt.Axes): Ось Matplotlib, на которой будет отрисовано изображение.
+        image (ArrayLike): Массив изображения (numpy или cupy).
+        title (str): Заголовок для изображения.
+        grid (bool): Показывать ли сетку.
+    """
     image_np = _ensure_numpy(image)
+    # Отсекаем значения для корректного отображения
     ax.imshow(np.clip(image_np, 0, 1))
     ax.set_title(title)
     ax.grid(grid)
     ax.axis('off')
 
 
-def save_results_comparison(original: np.ndarray, damaged: np.ndarray, recovered: np.ndarray, output_path: str):
+def save_results_comparison(
+        original: ArrayLike,
+        damaged: ArrayLike,
+        recovered: ArrayLike,
+        output_path: str
+):
     """
     Сохраняет сравнение оригинального, поврежденного и восстановленного изображений в один файл.
+
+    Args:
+        original (ArrayLike): Оригинальное изображение.
+        damaged (ArrayLike): Изображение с зануленными пикселями.
+        recovered (ArrayLike): Изображение после восстановления.
+        output_path (str): Путь для сохранения файла.
     """
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 
@@ -38,17 +59,29 @@ def save_results_comparison(original: np.ndarray, damaged: np.ndarray, recovered
         os.makedirs(output_dir, exist_ok=True)
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig(output_path)
+    plt.savefig(output_path, dpi=150)
     plt.close(fig)  # Закрываем фигуру, чтобы она не оставалась в памяти
     print(f"Сравнительное изображение сохранено в: {output_path}")
 
 
-def save_convergence_plot(norm_histories: list, titles: list, colors: list, output_path: str):
+def save_convergence_plot(
+        norm_histories: List[List[float]],
+        titles: List[str],
+        colors: List[str],
+        output_path: str
+):
     """
     Сохраняет графики сходимости ядерной нормы для каждого канала в файл.
+
+    Args:
+        norm_histories (List[List[float]]): Список историй сходимости (каждая история - список чисел).
+        titles (List[str]): Список заголовков для каждого графика.
+        colors (List[str]): Список цветов для каждого графика.
+        output_path (str): Путь для сохранения файла.
     """
     num_plots = len(norm_histories)
-    fig, axes = plt.subplots(1, num_plots, figsize=(5 * num_plots, 5), squeeze=False)
+    # squeeze=False гарантирует, что axes всегда будет 2D-массивом, даже если num_plots=1
+    fig, axes = plt.subplots(1, num_plots, figsize=(6 * num_plots, 5), squeeze=False)
 
     for i, history in enumerate(norm_histories):
         ax = axes[0, i]
@@ -66,6 +99,6 @@ def save_convergence_plot(norm_histories: list, titles: list, colors: list, outp
         os.makedirs(output_dir, exist_ok=True)
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig(output_path)
+    plt.savefig(output_path, dpi=150)
     plt.close(fig)
     print(f"График сходимости сохранен в: {output_path}")
