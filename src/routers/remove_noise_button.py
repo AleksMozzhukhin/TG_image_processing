@@ -1,10 +1,9 @@
 from aiogram import Router, html, F
-from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from keyboards_buttons import language_buttons, menu_buttons, ButtonText, DelNoise_States
-from button_states import Form
+from keyboards_buttons import menu_buttons, ButtonText
+from routers.button_states import Form, DelNoise_States
 from db import db_scripts, db_wares
 
 remove_noise = Router()
@@ -18,7 +17,7 @@ async def handle_remove_noise(message: Message, state: FSMContext) -> None:
     )
     await state.set_state(DelNoise_States.get_image)
 
-@remove_noise.message(Form.get_image, F.photo)
+@remove_noise.message(DelNoise_States.get_image, F.photo)
 async def process_received_image(message: Message, state: FSMContext) -> None:
     """Обработка полученного изображения."""
     photo: PhotoSize = message.photo[-1]
@@ -45,5 +44,3 @@ async def process_received_image(message: Message, state: FSMContext) -> None:
         reply_markup=menu_buttons()
     )
     await state.set_state(Form.buttons)
-
-

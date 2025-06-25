@@ -3,14 +3,22 @@ import asyncio
 import logging
 import sys
 from dotenv import load_dotenv
+from pathlib import Path 
 
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.bot import DefaultBotProperties
 
-from db import db_scripts, db_wares
+
 from routers.all_routers import all_routers
+
+parent_dir = str(Path(__file__).parent.parent)  # на два уровня выше: .parent.parent
+sys.path.append(parent_dir)
+
+from db import db_scripts, db_wares
+
+sys.path.remove(parent_dir)  
 
 load_dotenv()
 
@@ -19,8 +27,8 @@ async def main():
     dispatcher = Dispatcher()
     dispatcher.include_router(all_routers)
     #Разкомментить на девелопе и прочекать 
-    #db_instance = db_scripts.DataBase()
-    #dp.update.middleware(db_wares.DatabaseWares(db=db_instance))
+    db_instance = db_scripts.Database()
+    dp.update.middleware(db_wares.DatabaseWares(db=db_instance))
     if not (TELEGRAM_TOKEN := os.getenv("TELEGRAM_BOT_TOKEN")): 
         print("Telegram token not found! Install telegram token!")
         sys.exit(1)

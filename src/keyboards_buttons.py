@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 
 class ButtonText:
-    """Текст кнопочок в телеграмме"""
+    """Текст кнопочек в телеграмме"""
 
     REMOVE_NOISE = "Удалить шум с изображения"
     GENERATE_IMAGE = "Сгенерировать новое изображение"
@@ -36,3 +36,5 @@ def language_buttons() -> ReplyKeyboardMarkup:
     builder.add(KeyboardButton(text=ButtonText.SET_EN))
     builder.add(KeyboardButton(text=ButtonText.SET_RU))
     builder.adjust(1)
+
+    return builder.as_markup(resize_keyboard=True)
