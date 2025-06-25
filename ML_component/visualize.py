@@ -1,74 +1,71 @@
+import os
 import matplotlib.pyplot as plt
 import numpy as np
+import cupy as cp
 
 
-def show_image(image: np.ndarray, title: str = "", grid: bool = False, axis: bool = False):
+def _ensure_numpy(array: np.ndarray or cp.ndarray) -> np.ndarray:
+    """Вспомогательная функция, которая гарантирует, что массив является NumPy массивом."""
+    if isinstance(array, cp.ndarray):
+        return cp.asnumpy(array)
+    return array
+
+
+def show_image(ax, image: np.ndarray, title: str = "", grid: bool = False):
+    """Отображает одно изображение на предоставленной оси (Axes)."""
+    image_np = _ensure_numpy(image)
+    ax.imshow(np.clip(image_np, 0, 1))
+    ax.set_title(title)
+    ax.grid(grid)
+    ax.axis('off')
+
+
+def save_results_comparison(original: np.ndarray, damaged: np.ndarray, recovered: np.ndarray, output_path: str):
     """
-    Отображает одно изображение с заданными параметрами.
-
-    Args:
-        image (np.ndarray): Массив изображения.
-        title (str): Заголовок для изображения.
-        grid (bool): Показывать ли сетку.
-        axis (bool): Показывать ли оси координат.
+    Сохраняет сравнение оригинального, поврежденного и восстановленного изображений в один файл.
     """
-    # np.clip гарантирует, что значения пикселей будут в валидном диапазоне [0, 1]
-    # для корректного отображения, особенно после численных операций.
-    plt.imshow(np.clip(image, 0, 1))
-    plt.title(title)
-    plt.grid(grid)
-    plt.axis(axis)
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+
+    show_image(axes[0], original, "Оригинальное изображение")
+    show_image(axes[1], damaged, "Поврежденное изображение")
+    show_image(axes[2], recovered, "Восстановленное изображение")
+
+    fig.suptitle("Результат восстановления изображения методом ADMM", fontsize=16)
+
+    # Проверяем, существует ли директория для сохранения
+    output_dir = os.path.dirname(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.savefig(output_path)
+    plt.close(fig)  # Закрываем фигуру, чтобы она не оставалась в памяти
+    print(f"Сравнительное изображение сохранено в: {output_path}")
 
 
-def show_results(original: np.ndarray, damaged: np.ndarray, recovered: np.ndarray):
+def save_convergence_plot(norm_histories: list, titles: list, colors: list, output_path: str):
     """
-    Отображает оригинальное, поврежденное и восстановленное изображения в один ряд для сравнения.
-
-    Args:
-        original (np.ndarray): Оригинальное изображение.
-        damaged (np.ndarray): Изображение с зануленными пикселями.
-        recovered (np.ndarray): Изображение после восстановления.
+    Сохраняет графики сходимости ядерной нормы для каждого канала в файл.
     """
-    plt.figure(figsize=(18, 6))
-
-    plt.subplot(1, 3, 1)
-    show_image(original, "Оригинальное изображение")
-
-    plt.subplot(1, 3, 2)
-    show_image(damaged, "Поврежденное изображение")
-
-    plt.subplot(1, 3, 3)
-    show_image(recovered, "Восстановленное изображение")
-
-    plt.suptitle("Результат восстановления изображения методом ADMM", fontsize=16)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Корректируем расположение, чтобы заголовок не накладывался
-    plt.show()
-
-
-def plot_convergence(norm_histories: list, titles: list, colors: list):
-    """
-    Строит графики сходимости ядерной нормы для каждого канала в логарифмическом масштабе.
-
-    Args:
-        norm_histories (list): Список списков, где каждый внутренний список - история ядерной нормы для одного канала.
-        titles (list): Список заголовков для каждого графика (например, имена каналов).
-        colors (list): Список цветов для каждого графика.
-    """
-    if not (len(norm_histories) == len(titles) == len(colors)):
-        raise ValueError("Длины списков должны совпадать")
-
     num_plots = len(norm_histories)
-    plt.figure(figsize=(5 * num_plots, 5))
+    fig, axes = plt.subplots(1, num_plots, figsize=(5 * num_plots, 5), squeeze=False)
 
     for i, history in enumerate(norm_histories):
-        plt.subplot(1, num_plots, i + 1)
-        plt.plot(history, color=colors[i], linewidth=2)
-        plt.title(f"Сходимость ({titles[i]})")
-        plt.xlabel("Итерация")
-        plt.ylabel("Ядерная норма")
-        plt.yscale("log")  # Логарифмическая шкала для лучшей наглядности на начальных этапах
-        plt.grid(True, which="both", linestyle='--', linewidth=0.5)
+        ax = axes[0, i]
+        ax.plot(history, color=colors[i], linewidth=2)
+        ax.set_title(f"Сходимость ({titles[i]})")
+        ax.set_xlabel("Итерация")
+        ax.set_ylabel("Ядерная норма")
+        ax.set_yscale("log")
+        ax.grid(True, which="both", linestyle='--', linewidth=0.5)
 
-    plt.suptitle("Сходимость алгоритма по каналам", fontsize=16)
+    fig.suptitle("Сходимость алгоритма по каналам", fontsize=16)
+
+    output_dir = os.path.dirname(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.show()
+    plt.savefig(output_path)
+    plt.close(fig)
+    print(f"График сходимости сохранен в: {output_path}")

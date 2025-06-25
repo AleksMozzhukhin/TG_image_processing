@@ -1,7 +1,7 @@
-# utils.py
+import cupy as cp
 import numpy as np
 import cv2
-
+import os
 
 def load_image(path: str, normalize: bool = True) -> np.ndarray:
     """
@@ -61,3 +61,26 @@ def generate_mask(shape: tuple, known_pixel_ratio: float, seed: int = 42) -> np.
     np.random.shuffle(flat_mask)
 
     return flat_mask.reshape(shape)
+
+
+def save_image(image_array: np.ndarray, path: str):
+    """
+    Сохраняет изображение из NumPy массива в файл.
+    """
+    # Убеждаемся, что работаем с NumPy массивом
+    if isinstance(image_array, cp.ndarray):
+        image_array = cp.asnumpy(image_array)
+
+    # Отсекаем значения и денормализуем
+    image_to_save = (np.clip(image_array, 0, 1) * 255).astype(np.uint8)
+
+    # Конвертируем из RGB в BGR для OpenCV
+    image_bgr = cv2.cvtColor(image_to_save, cv2.COLOR_RGB2BGR)
+
+    # Создаем директорию, если ее нет
+    output_dir = os.path.dirname(path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+
+    cv2.imwrite(path, image_bgr)
+    print(f"Изображение сохранено в: {path}")

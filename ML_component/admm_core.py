@@ -1,4 +1,4 @@
-import numpy as np
+import cupy as np
 
 
 def MC_update_X(Z: np.ndarray, lambda_: np.ndarray, r: float) -> np.ndarray:
@@ -18,11 +18,11 @@ def MC_update_X(Z: np.ndarray, lambda_: np.ndarray, r: float) -> np.ndarray:
     u, s, vt = np.linalg.svd(matrix_to_decompose, full_matrices=False)
 
     # Пороговое сжатие (soft-thresholding) сингулярных чисел
-    matrix_to_decompose = Z - lambda_ / r
-    u, s, vt = np.linalg.svd(matrix_to_decompose, full_matrices=False)
     threshold = 1.0 / r
     s_thresholded = np.maximum(s - threshold, 0)
+
     return u @ np.diag(s_thresholded) @ vt
+
 
 def MC_update_Z(X: np.ndarray, lambda_: np.ndarray, r: float, Y: np.ndarray, mask: np.ndarray) -> np.ndarray:
     """
@@ -74,7 +74,7 @@ def MC_ADMM(Y: np.ndarray, mask: np.ndarray, tol: float, max_iters: int, r: floa
 
     # Инициализация истории для отслеживания сходимости
     u, s, v = np.linalg.svd(X, compute_uv=True)
-    norm_prev = np.sum(s)
+    norm_prev = np.sum(s).item()
     norms_history = [norm_prev]
 
     for i in range(max_iters):
@@ -89,16 +89,17 @@ def MC_ADMM(Y: np.ndarray, mask: np.ndarray, tol: float, max_iters: int, r: floa
 
         # Проверка сходимости по изменению ядерной нормы
         u, s, v = np.linalg.svd(X, compute_uv=True)
-        norm_current = np.sum(s)
+        # ИСПРАВЛЕНО: Преобразуем скаляр CuPy в число Python
+        norm_current = np.sum(s).item()
         norms_history.append(norm_current)
 
-        if np.abs(norm_current - norm_prev) < tol:
+        # abs() для обычных чисел Python, np.abs() для массивов
+        if abs(norm_current - norm_prev) < tol:
             print(f"Сходимость достигнута на итерации {i + 1}.")
             break
 
         norm_prev = norm_current
-
-    if i == max_iters - 1:
+    else:
         print("Достигнуто максимальное количество итераций.")
 
     return X, norms_history
