@@ -14,6 +14,8 @@ AWAITING_IMAGE_UPLOAD = IMAGE_PROCESSING_BASE + 0
 PROCESSING_IMAGE = IMAGE_PROCESSING_BASE + 1
 IMAGE_RESULT_READY = IMAGE_PROCESSING_BASE + 2
 
+IS_CHOOSING_ACTION=2
+
 def generate_image(): 
     pass
 def view_history(): 
@@ -67,7 +69,7 @@ async def process_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
     msg_id = context.user_data["processing_msg_id"]
     
     try:
-        image_data = get_image_from_db(image_id)
+        image_data = get_image_from_db(image_id) # вот тут нужна обработка с бэка 
 
         processed_image = await process_image(image_data)
         await context.bot.edit_message_text(
