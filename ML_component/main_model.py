@@ -7,7 +7,9 @@ from . import utils
 from . import visualize
 
 
-def create_mask_from_damaged(damaged_image: np.ndarray, threshold: int = 10) -> np.ndarray:
+def create_mask_from_damaged(damaged_image: np.ndarray,
+                             threshold: int = 10
+) -> np.ndarray:
     """
     Создает маску известных пикселей на основе поврежденного изображения (работает с NumPy массивами).
     Пиксель считается известным, если он не является почти черным.

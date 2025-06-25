@@ -110,7 +110,10 @@ def load_image(path: str, normalize: bool = True) -> np.ndarray:
     return image_rgb
 
 
-def generate_mask(shape: Tuple[int, int], known_pixel_ratio: float, seed: int = 42) -> np.ndarray:
+def generate_mask(shape: Tuple[int, int],
+                  known_pixel_ratio: float,
+                  seed: int = 42
+) -> np.ndarray:
     """
     Генерирует бинарную NumPy маску, где True означает известный пиксель.
 
