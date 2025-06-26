@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, Union, IO
 import numpy as np
 
 from . import admm_core
@@ -35,40 +35,56 @@ def create_mask_from_damaged(damaged_image: np.ndarray,
 
 
 def run_inpainting_pipeline(
-        damaged_image_path: str,
-        output_dir: str,
-        max_iters: int = 250,
-        original_image_path: Optional[str] = None,
-        use_gpu: bool = True
+    damaged_image_source: Union[str, IO[bytes]],
+    output_dir: str,
+    max_iters: int = 250,
+    original_image_source: Optional[Union[str, IO[bytes]]] = None,
+    use_gpu: bool = True
 ) -> Optional[np.ndarray]:
     """
-    Главная функция для запуска всего процесса восстановления изображения.
-    Оркестрирует загрузку данных, выбор бэкенда (CPU/GPU), запуск ADMM и сохранение результатов.
+    Главная функция для запуска всего процесса восстановления изображения (inpainting).
+
+    Оркестрирует загрузку данных, выбор вычислительного бэкенда (CPU/GPU),
+    запуск алгоритма ADMM для матричного дозаполнения и сохранение результатов.
+    Может принимать на вход как пути к файлам, так и байтовые потоки изображений.
 
     Args:
-        damaged_image_path (str): Путь к поврежденному изображению.
-        output_dir (str): Папка для сохранения всех результатов.
-        max_iters (int): Максимальное количество итераций для ADMM.
-        original_image_path (Optional[str]): Путь к оригинальному изображению для сравнения.
-                                              Если не указан (None), сравнительный график не создается.
-        use_gpu (bool): Флаг для использования GPU. Если True, будет предпринята попытка
-                        использовать CuPy, при неудаче - откат к NumPy.
+        damaged_image_source (Union[str, IO[bytes]]):
+            Источник поврежденного изображения. Может быть строкой с путем к файлу
+            или файлоподобным объектом с байтами (например, io.BytesIO из Telegram).
+
+        output_dir (str):
+            Путь к папке, в которую будут сохранены все результаты (восстановленное
+            изображение, графики). Папка будет создана, если не существует.
+
+        max_iters (int, optional):
+            Максимальное количество итераций для алгоритма ADMM. По умолчанию 250.
+
+        original_image_source (Optional[Union[str, IO[bytes]]], optional):
+            Источник оригинального (неповрежденного) изображения для создания
+            сравнительной визуализации. Если не указан (None), сравнительный
+            график создаваться не будет. По умолчанию None.
+
+        use_gpu (bool, optional):
+            Флаг для использования GPU. Если True, будет предпринята попытка
+            использовать CuPy для вычислений. При его отсутствии или ошибке
+            произойдет автоматический откат к NumPy (CPU). По умолчанию True.
 
     Returns:
-        Optional[np.ndarray]: Восстановленное изображение в виде NumPy массива, если процесс прошел успешно,
-                              иначе None.
+        Optional[np.ndarray]:
+            Восстановленное изображение в виде NumPy массива (на CPU) в случае
+            успешного выполнения. Возвращает None, если в процессе произошла ошибка.
     """
 
     # --- 1. Выбор бэкенда и настройка путей ---
     backend = utils.get_backend(use_gpu)
 
     os.makedirs(output_dir, exist_ok=True)
-    base_name = os.path.splitext(os.path.basename(damaged_image_path))[0]
 
     # Формируем пути для сохранения результатов
-    RECOVERED_IMAGE_PATH = os.path.join(output_dir, f"{base_name}_recovered.png")
-    COMPARISON_PLOT_PATH = os.path.join(output_dir, f"{base_name}_comparison.png")
-    CONVERGENCE_PLOT_PATH = os.path.join(output_dir, f"{base_name}_convergence.png")
+    RECOVERED_IMAGE_PATH = os.path.join(output_dir, f"recovered.png")
+    COMPARISON_PLOT_PATH = os.path.join(output_dir, f"comparison.png")
+    CONVERGENCE_PLOT_PATH = os.path.join(output_dir, f"convergence.png")
 
     # Параметры ADMM
     ADMM_TOL = 1e-3
@@ -76,8 +92,8 @@ def run_inpainting_pipeline(
 
     try:
         # --- 2. Загрузка данных (всегда на CPU) ---
-        print(f"Загрузка поврежденного изображения: {damaged_image_path}")
-        damaged_image_np = utils.load_image(damaged_image_path)
+        print(f"Загрузка поврежденного изображения...")
+        damaged_image_np = utils.load_image(damaged_image_source)
 
         # --- 3. Создание маски и перенос на выбранный бэкенд ---
         print("Создание маски на основе поврежденного изображения...")
@@ -117,9 +133,9 @@ def run_inpainting_pipeline(
             norm_histories, channel_names, ["red", "green", "blue"], CONVERGENCE_PLOT_PATH
         )
 
-        if original_image_path:
-            print(f"Загрузка оригинального изображения для сравнения: {original_image_path}")
-            original_image_np = utils.load_image(original_image_path)
+        if original_image_source:
+            print(f"Загрузка оригинального изображения для сравнения...")
+            original_image_np = utils.load_image(original_image_source)
             visualize.save_results_comparison(
                 original_image_np, damaged_image_np, recovered_image_np,
                 COMPARISON_PLOT_PATH
@@ -135,19 +151,19 @@ def run_inpainting_pipeline(
     return None
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # Вызов для тестирования
-    print("--- Запуск в тестовом режиме ---")
-
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    damaged_path = os.path.join(script_dir, 'data', 'damaged.png')
-    original_path = os.path.join(script_dir, 'data', 'img.png')
-    output_path = os.path.join(script_dir, 'output_test')
-
-    run_inpainting_pipeline(
-        damaged_image_path=damaged_path,
-        output_dir=output_path,
-        max_iters=250,
-        original_image_path=original_path,
-        use_gpu=True # Попытаться использовать GPU, если доступен
-    )
+    # print("--- Запуск в тестовом режиме ---")
+    #
+    # script_dir = os.path.dirname(os.path.abspath(__file__))
+    # damaged_path = os.path.join(script_dir, 'data', 'damaged.png')
+    # original_path = os.path.join(script_dir, 'data', 'img.png')
+    # output_path = os.path.join(script_dir, 'output_test')
+    #
+    # run_inpainting_pipeline(
+    #     damaged_image_path=damaged_path,
+    #     output_dir=output_path,
+    #     max_iters=250,
+    #     original_image_path=original_path,
+    #     use_gpu=True # Попытаться использовать GPU, если доступен
+    # )
