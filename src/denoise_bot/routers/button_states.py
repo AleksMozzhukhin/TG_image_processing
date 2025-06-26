@@ -13,5 +13,5 @@ class DelNoise_States(StatesGroup):
     get_image = State()
 
 class GenImage_States(StatesGroup): 
-    """Состояние кнопки для генерации картинки"""
+    """Состояния кнопки для генерации картинки"""
     waiting_for_prompt = State()
