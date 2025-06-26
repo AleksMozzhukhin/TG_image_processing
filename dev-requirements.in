@@ -1,0 +1,23 @@
+-r requirements.in
+
+# Инструменты для форматирования и проверки кода
+black
+isort
+flake8
+flake8-docstrings
+pydocstyle[toml]
+
+# Инструмент для Git-хуков
+pre-commit
+
+# Инструмент для управления зависимостями
+pip-tools
+
+# Инструменты для тестирования
+pytest
+pytest-mock
+
+# Инструменты для сборки документации
+Sphinx
+sphinx-autobuild
+sphinx-autodoc-typehints

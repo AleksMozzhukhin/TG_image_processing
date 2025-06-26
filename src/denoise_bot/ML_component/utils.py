@@ -1,5 +1,7 @@
 import os
-from typing import Union, Tuple, Type, IO
+import types
+from typing import IO, NewType, Tuple, Union
+
 import cv2
 import numpy as np
 
@@ -7,18 +9,28 @@ try:
     import cupy as cp
 
     CUPY_AVAILABLE = True
-    ArrayLike = Union[np.ndarray, cp.ndarray]
-    BackendModule = Union[Type[np], Type[cp]]
+
+    #: Псевдоним для массивов, которые могут быть на CPU (NumPy) или GPU (CuPy).
+    ArrayLike = NewType("ArrayLike", Union[np.ndarray, cp.ndarray])
+
+    #: Псевдоним для вычислительного бэкенда (модуль :py:mod:`numpy` или :py:mod:`cupy`).
+    BackendModule = NewType("BackendModule", types.ModuleType)
+
 except ImportError:
     cupy = None
     CUPY_AVAILABLE = False
-    ArrayLike = np.ndarray
-    BackendModule = Type[np]
+
+    # --- То же самое для случая без CuPy ---
+    ArrayLike = NewType("ArrayLike", np.ndarray)
+    BackendModule = NewType("BackendModule", types.ModuleType)
 
 
-def get_backend(use_gpu: bool = True) -> BackendModule:
+def get_backend(use_gpu: bool = True) -> "BackendModule":
     """
-    Возвращает вычислительный бэкенд (NumPy или CuPy) в зависимости от доступности GPU и выбора пользователя.
+    Выбор бэкенда.
+
+    Возвращает вычислительный бэкенд (NumPy или CuPy) в зависимости от
+    доступности GPU и выбора пользователя.
 
     Args:
         use_gpu (bool): Флаг, указывающий, нужно ли пытаться использовать GPU.
@@ -31,14 +43,18 @@ def get_backend(use_gpu: bool = True) -> BackendModule:
         return cp
     else:
         if use_gpu and not CUPY_AVAILABLE:
-            print("Предупреждение: Запрошен GPU, но CuPy не найден. Используется CPU (NumPy).")
+            print(
+                "Предупреждение: Запрошен GPU, но CuPy не найден. Используется CPU (NumPy)."
+            )
         print("CPU (NumPy) выбран в качестве бэкенда.")
         return np
 
 
-def _ensure_numpy(array: ArrayLike) -> np.ndarray:
+def _ensure_numpy(array: "ArrayLike") -> np.ndarray:
     """
-    Вспомогательная функция, которая гарантирует, что массив находится на CPU (является NumPy массивом).
+    Определяет местонахождение массива.
+
+    Вспомогательная функция, которая гарантирует, что массив находится на CPU.
     Если на вход подан CuPy массив, он будет скопирован на CPU.
 
     Args:
@@ -52,7 +68,7 @@ def _ensure_numpy(array: ArrayLike) -> np.ndarray:
     return np.asarray(array)
 
 
-def as_numpy(array: ArrayLike) -> np.ndarray:
+def as_numpy(array: "ArrayLike") -> np.ndarray:
     """
     Универсальная функция для преобразования CuPy/NumPy массива в NumPy массив (на CPU).
 
@@ -67,7 +83,7 @@ def as_numpy(array: ArrayLike) -> np.ndarray:
     return np.asarray(array)
 
 
-def as_backend_array(array: ArrayLike, backend: BackendModule) -> ArrayLike:
+def as_backend_array(array: "ArrayLike", backend: "BackendModule") -> "ArrayLike":
     """
     Универсальная функция для преобразования массива в массив нужного бэкенда.
 
@@ -89,7 +105,7 @@ def load_image(source: Union[str, IO[bytes]], normalize: bool = True) -> np.ndar
     Загружает изображение из файла или байтового потока.
 
     Args:
-        source (Union[str, IO[bytes]]): Путь к файлу (str) или байтовый поток (например, io.BytesIO).
+        source (Union[str, IO[bytes]]): Путь к файлу (str) или байтовый поток (io.BytesIO).
         normalize (bool): Если True, нормализует значения пикселей в диапазон [0, 1].
 
     Returns:
@@ -101,7 +117,9 @@ def load_image(source: Union[str, IO[bytes]], normalize: bool = True) -> np.ndar
     if isinstance(source, str):
         image = cv2.imread(source)
         if image is None:
-            raise FileNotFoundError(f"Не удалось загрузить изображение по пути: {source}")
+            raise FileNotFoundError(
+                f"Не удалось загрузить изображение по пути: {source}"
+            )
     else:
         # Если это байтовый поток, читаем его в NumPy массив
         file_bytes = np.frombuffer(source.read(), np.uint8)
@@ -119,9 +137,8 @@ def load_image(source: Union[str, IO[bytes]], normalize: bool = True) -> np.ndar
     return image_rgb
 
 
-def generate_mask(shape: Tuple[int, int],
-                  known_pixel_ratio: float,
-                  seed: int = 42
+def generate_mask(
+    shape: Tuple[int, int], known_pixel_ratio: float, seed: int = 42
 ) -> np.ndarray:
     """
     Генерирует бинарную NumPy маску, где True означает известный пиксель.
@@ -153,7 +170,7 @@ def generate_mask(shape: Tuple[int, int],
     return flat_mask.reshape(shape)
 
 
-def save_image(image_array: ArrayLike, path: str):
+def save_image(image_array: "ArrayLike", path: str):
     """
     Сохраняет изображение из NumPy или CuPy массива в файл.
 

@@ -1,0 +1,66 @@
+"""
+Основной файл для запуска Telegram-бота.
+
+Этот модуль отвечает за инициализацию, настройку и запуск
+бота, а также за подключение всех необходимых роутеров и зависимостей.
+"""
+
+import asyncio
+import logging
+import os
+import sys
+
+import supabase as sb
+from aiogram import Bot, Dispatcher
+from aiogram.client.bot import DefaultBotProperties
+from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage  # <--- 1. ДОБАВЛЕН ИМПОРТ
+from dotenv import load_dotenv
+
+from .routers.all_routers import all_routers
+
+load_dotenv()
+URL = "https://xxuexzibyxlprgbsrdgs.supabase.co/"
+KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4dWV4emlieXhscHJnYnNyZGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5MTkxNTQsImV4cCI6MjA2NjQ5NTE1NH0.xWD19A8HrQ-g60PICFTqu-CwrBVgHFhN3FFtWcp1Xq4"  # noqa: E501
+SUPABASE_CLIENT = sb.create_client(URL, KEY)
+
+
+async def main():
+    """Основная функция для запуска бота."""
+    telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
+
+    if not telegram_token:
+        logging.critical(
+            "Не удалось загрузить все переменные окружения! (TOKEN, SUPABASE_URL, SUPABASE_KEY)"  # noqa: W505, E501
+        )
+        sys.exit(1)
+
+    # 2. СОЗДАЕМ ХРАНИЛИЩЕ И ПЕРЕДАЕМ ЕГО В ДИСПЕТЧЕР
+    storage = MemoryStorage()
+
+    # Передаем зависимости (как storage, так и supabase_client)
+    # напрямую в конструктор
+    dispatcher = Dispatcher(storage=storage, supabase_client=SUPABASE_CLIENT)
+
+    dispatcher.include_router(all_routers)
+
+    bot = Bot(
+        token=telegram_token,
+        default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN),
+    )
+    logging.info("Бот запускается...")
+
+    # dispatcher["supabase_client"] = SUPABASE_CLIENT
+    # Этот способ тоже рабочий, но через конструктор чище
+
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dispatcher.start_polling(bot)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        stream=sys.stdout,
+        format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s",  # noqa: E501
+    )
+    asyncio.run(main())

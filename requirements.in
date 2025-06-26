@@ -1,0 +1,13 @@
+# Основные библиотеки для ML-компонента
+numpy
+opencv-python-headless
+matplotlib
+cupy-cuda12x
+
+# Библиотеки для работы бота и API
+aiogram
+python-dotenv
+supabase
+
+# Драйвер для PostgreSQL.
+psycopg[binary]

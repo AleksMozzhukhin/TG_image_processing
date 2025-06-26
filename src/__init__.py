@@ -1,2 +1,3 @@
 """Init for Bot."""
-from .__main__ import main
+
+from src.denoise_bot.__main__ import main
