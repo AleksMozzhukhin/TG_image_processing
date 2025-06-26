@@ -57,23 +57,26 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         if len(recovered_image_np.shape) == 3 and recovered_image_np.shape[-1] == 3:
             recovered_image_np = cv2.cvtColor(recovered_image_np, cv2.COLOR_BGR2RGB)
 
-        success, encoded_img = cv2.imencode('.png', recovered_image_np)
+        success, encoded_img = cv2.imencode('.jpg', recovered_image_np)
         if not success:
-            raise ValueError("Ошибка кодирования PNG")
+            raise ValueError("Ошибка кодирования jpg")
 
         processed_image_bytes = encoded_img.tobytes()
         print('tobytes passed\n')
           
-        file_name = f"processed_{user.id}_{uuid.uuid4().hex}.png"
+        file_name = f"processed_{user.id}_{uuid.uuid4().hex}.jpg"
         file_path = f"users/{user.id}/{file_name}"
 
-        # storage_response = supabase_client.storage.from_("images").upload(
-        #     path=file_path,
-        #     file=processed_image_bytes,
-        #     file_options={"content-type": "image/png"}
-        # )
+        print("\n", file_path, "\n", "file path")
+
+        storage_response = supabase_client.storage.from_("images").upload(
+            path=file_path,
+            file=processed_image_bytes,
+            file_options={"content-type": "image/*"}
+        )
 
         print('storage response passed\n')
+        print(storage_response)
 
         image_url = "https://google.com" # supabase_client.storage.from_("images").get_public_url(file_path)
         
@@ -91,7 +94,7 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         print('db response passed\n')
         photo_file = BufferedInputFile(
             file=encoded_img.tobytes(),
-            filename="result.png"
+            filename="result.jpg"
         )
 
         await message.answer_photo(
