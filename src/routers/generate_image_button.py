@@ -7,6 +7,7 @@ from io import BytesIO
 from dotenv import load_dotenv
 from datetime import datetime
 import os
+import supabase as sb
 
 from keyboards_buttons import menu_buttons, ButtonText
 from routers.button_states import Form, GenImage_States
@@ -31,7 +32,7 @@ async def handle_generate_image(message: Message, state: FSMContext) -> None:
 
 @generate_image.message(GenImage_States.waiting_for_prompt)
 async def generate_image_from_text(message: Message, state: FSMContext, 
-                                 db: db_scripts.Database) -> None:
+                                 supabase_client: sb.Client) -> None:
     """Генерация изображения по тексту через API"""
     prompt = message.text
 
@@ -77,12 +78,24 @@ async def generate_image_from_text(message: Message, state: FSMContext,
                 image_base64 = result_data["images"][0]
                 image_data = base64.b64decode(image_base64)
                 
-        db.add_image(
-            message.from_user.id,
-            prompt,
-            image_data, 
-            current_datetime
+                file_name = f"generated_{user.id}_{uuid4().hex}.png"
+        file_path = f"users/{user.id}/{file_name}"
+        
+        upload_response = supabase_client.storage.from_("images").upload(
+            file_path,
+            image_data,
+            file_options={"content-type": "image/png"}
         )
+        
+        public_url = supabase_client.storage.from_("images").get_public_url(file_path)
+        record_data = {
+            "created_at": current_datetime.isoformat()
+            "user_id": user.id,
+            "request": prompt,
+            "public_url": public_url,
+        }
+        
+        supabase_client.table("images").insert(record_data).execute()
         
         await message.answer_photo(
             BytesIO(image_data),
