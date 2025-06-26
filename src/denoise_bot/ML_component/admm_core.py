@@ -1,4 +1,5 @@
 from typing import List, Tuple
+
 from .utils import ArrayLike, BackendModule
 
 try:
@@ -7,11 +8,9 @@ except ImportError:
     pass
 
 
-def MC_update_X(Z: 'ArrayLike',
-                lambda_: 'ArrayLike',
-                r: float,
-                np: 'BackendModule'
-) -> 'ArrayLike':
+def MC_update_X(
+    Z: "ArrayLike", lambda_: "ArrayLike", r: float, np: "BackendModule"
+) -> "ArrayLike":
     """
     Шаг обновления низкоранговой матрицы X через пороговое сжатие сингулярных чисел (SVT).
     Это соответствует решению задачи: argmin_X ||X||_* + (r/2)||X - Z + U||^2_F
@@ -35,12 +34,9 @@ def MC_update_X(Z: 'ArrayLike',
     return u @ np.diag(s_thresholded) @ vt
 
 
-def MC_update_Z(X: 'ArrayLike',
-                lambda_: 'ArrayLike',
-                r: float,
-                Y: 'ArrayLike',
-                mask: 'ArrayLike'
-) -> 'ArrayLike':
+def MC_update_Z(
+    X: "ArrayLike", lambda_: "ArrayLike", r: float, Y: "ArrayLike", mask: "ArrayLike"
+) -> "ArrayLike":
     """
     Шаг обновления матрицы Z, удовлетворяющей ограничениям на известные пиксели.
     Это соответствует проекции на множество матриц, совпадающих с Y на маске E.
@@ -64,13 +60,14 @@ def MC_update_Z(X: 'ArrayLike',
     return Z_new
 
 
-def MC_ADMM(Y: 'ArrayLike',
-            mask: 'ArrayLike',
-            tol: float,
-            max_iters: int,
-            r: float,
-            backend: 'BackendModule'
-) -> Tuple['ArrayLike', List[float]]:
+def MC_ADMM(
+    Y: "ArrayLike",
+    mask: "ArrayLike",
+    tol: float,
+    max_iters: int,
+    r: float,
+    backend: "BackendModule",
+) -> Tuple["ArrayLike", List[float]]:
     """
     Решает задачу матричного дозаполнения с помощью ADMM, управляя итерационным процессом.
 
@@ -100,7 +97,9 @@ def MC_ADMM(Y: 'ArrayLike',
 
     # Инициализация истории для отслеживания сходимости
     u, s, v = backend.linalg.svd(X, compute_uv=True)
-    norm_prev = backend.sum(s).get().item() if hasattr(s, 'get') else backend.sum(s).item()
+    norm_prev = (
+        backend.sum(s).get().item() if hasattr(s, "get") else backend.sum(s).item()
+    )
     norms_history = [norm_prev]
 
     for i in range(max_iters):
@@ -116,7 +115,9 @@ def MC_ADMM(Y: 'ArrayLike',
         # Проверка сходимости по изменению ядерной нормы
         u, s, v = backend.linalg.svd(X, compute_uv=True)
 
-        norm_current = backend.sum(s).get().item() if hasattr(s, 'get') else backend.sum(s).item()
+        norm_current = (
+            backend.sum(s).get().item() if hasattr(s, "get") else backend.sum(s).item()
+        )
         norms_history.append(norm_current)
 
         # abs() для обычных чисел Python, np.abs() для массивов

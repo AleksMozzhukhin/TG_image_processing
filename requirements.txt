@@ -19,4 +19,4 @@ python-telegram-bot
 psycopg2-binary
 psycopg[binary]
 aiogram==3.20.0
-supabase=2.16.0
+supabase==2.16.0
