@@ -20,8 +20,8 @@ load_dotenv()
 generate_image = Router()
 
 # Константы для FusionBrain API
-FUSIONBRAIN_API_KEY = os.getenv("FUSIONBRAIN_API_KEY")
-FUSIONBRAIN_API_SECRET = os.getenv("FUSIONBRAIN_API_SECRET")
+FUSIONBRAIN_API_KEY = "E41777D35F336F1D0C2B00EB08D75F38"
+FUSIONBRAIN_API_SECRET = "1E0A23558FF802583C814E5AD49C4814"
 FUSIONBRAIN_URL = "https://api-key.fusionbrain.ai/key/api/v1/pipeline/run'"
 
 @generate_image.callback_query(Form.is_choosing, F.data.startswith("generate_image"))
