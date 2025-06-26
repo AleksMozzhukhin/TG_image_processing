@@ -1,11 +1,11 @@
-from aiogram import Router, html
+from aiogram import Router, html, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 import supabase as sb
 
 from keyboards_buttons import menu_buttons, ButtonText
-from routers.button_states import Form, view_States
+from routers.button_states import Form
 
 view_history = Router()
 
@@ -83,4 +83,5 @@ async def handle_exit_history(callback: CallbackQuery):
         "Выберите действие:",
         reply_markup=menu_buttons()
     )
+    await state.set_state(Form.menu)
     await callback.answer()

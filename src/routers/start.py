@@ -6,6 +6,7 @@ import os
 import sys 
 from pathlib import Path 
 import supabase as sb
+import gettext
 
 from keyboards_buttons import language_buttons, menu_buttons
 from routers.button_states import Form
@@ -50,13 +51,14 @@ async def command_start(message: Message, state: FSMContext, supabase_client: sb
 async def process_language_selection(callback: CallbackQuery, state: FSMContext, supabase_client: sb.Client):
     """Обработка выбора языка."""
     language = callback.data.split("_")[1]  
-    user_langs[callback.from_user.id] = lang
-    set_locale(lang)
+    user_langs[callback.from_user.id] = language
+    set_locale(language)
     
     await callback.message.edit_text(
         text="Выбран русский язык" if language == "ru_RU" else "English language selected",
         reply_markup=None  
     )
+    await show_main_menu(callback.message) 
     await state.set_state(Form.menu)
     await callback.answer()
 

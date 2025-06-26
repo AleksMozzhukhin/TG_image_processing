@@ -27,7 +27,7 @@ CUTE_CAPTIONS = [
 ]
 
 @magic.message(Form.buttons, F.text == ButtonText.MAGIC)
-async def handle_magic_button(message: Message, state: FSMContext, db: db_scripts.Database) -> None:
+async def handle_magic_button(message: Message, state: FSMContext) -> None:
     """Используйте волшебную кнопку — отправляйте случайные фотографии котиков с милыми подписями"""
     num_images = random.randint(1, 5)
     

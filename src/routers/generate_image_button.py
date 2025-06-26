@@ -89,7 +89,7 @@ async def generate_image_from_text(message: Message, state: FSMContext,
         
         public_url = supabase_client.storage.from_("images").get_public_url(file_path)
         record_data = {
-            "created_at": current_datetime.isoformat()
+            "created_at": current_datetime.isoformat(),
             "user_id": user.id,
             "request": prompt,
             "public_url": public_url,

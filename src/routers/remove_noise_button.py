@@ -5,7 +5,7 @@ import supabase as sb
 
 from keyboards_buttons import menu_buttons, ButtonText
 from routers.button_states import Form, DelNoise_States
-from db import db_scripts, db_wares
+
 
 remove_noise = Router()
 
@@ -57,9 +57,9 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         image_url = supabase_client.storage.from_("images").get_public_url(file_path)
         
         request_data = {
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
             "user_id": user.id,
-            "request": "remove noise"
+            "request": "remove noise",
             "image_url": image_url, 
         }
         

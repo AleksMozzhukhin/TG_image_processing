@@ -1,8 +1,10 @@
 from aiogram.types import (
     KeyboardButton,
-    ReplyKeyboardMarkup
+    ReplyKeyboardMarkup,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
 )
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 
 class ButtonText:
@@ -29,12 +31,12 @@ def menu_buttons() -> ReplyKeyboardMarkup:
 
     return builder.as_markup(resize_keyboard=True)
 
-def language_buttons() -> ReplyKeyboardMarkup:
-    """Показ кнопок выбора языка"""
-    builder = ReplyKeyboardBuilder()
+def language_buttons() -> InlineKeyboardMarkup:
+    """Показ кнопок выбора языка (инлайн клавиатура)"""
+    builder = InlineKeyboardBuilder()
 
-    builder.add(KeyboardButton(text=ButtonText.SET_EN, callback_data='lang-ru_RU'))
-    builder.add(KeyboardButton(text=ButtonText.SET_RU, callback_data='lang-en_US'))
-    builder.adjust(1)
-
-    return builder.as_markup(resize_keyboard=True)
+    builder.button(text=ButtonText.SET_RU, callback_data="lang_ru_RU")
+    builder.button(text=ButtonText.SET_EN, callback_data="lang_en_EN")
+    
+    builder.adjust(2)
+    return builder.as_markup()
