@@ -78,7 +78,7 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         print('storage response passed\n')
         print(storage_response)
 
-        image_url = "https://google.com" # supabase_client.storage.from_("images").get_public_url(file_path)
+        image_url = supabase_client.storage.from_("images").get_public_url(file_path)
         
         request_data = {
             "created_at": datetime.datetime.now().isoformat(),
