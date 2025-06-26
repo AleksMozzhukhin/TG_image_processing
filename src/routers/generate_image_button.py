@@ -11,7 +11,7 @@ import supabase as sb
 
 from keyboards_buttons import menu_buttons, ButtonText
 from routers.button_states import Form, GenImage_States
-from db import db_scripts
+
 
 load_dotenv()
 
