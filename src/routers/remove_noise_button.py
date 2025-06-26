@@ -6,6 +6,7 @@ import cv2
 import datetime
 import io
 import uuid
+import numpy as np
 
 from ..keyboards_buttons import menu_buttons, ButtonText
 from .button_states import Form, DelNoise_States
@@ -14,7 +15,6 @@ from ML_component import main_model
 
 
 remove_noise = Router()
-
 
 
 @remove_noise.callback_query(Form.is_choosing, F.data.startswith("remove_noise"))
@@ -29,39 +29,41 @@ async def handle_remove_noise(callback: CallbackQuery, state: FSMContext) -> Non
 
 @remove_noise.message(DelNoise_States.get_image, F.photo)
 async def process_received_image(message: Message, state: FSMContext, supabase_client: sb.Client) -> None:
-    """Обработка полученного изображения."""
     photo: PhotoSize = message.photo[-1]
     user = message.from_user
+    
     try:
         image_bytes_io = await message.bot.download(photo.file_id)
-        print('image bytes io passed\n')
         image_bytes = image_bytes_io.read()
-        print('image bytes passed\n')
+        
         temp_dir = mkdtemp(prefix="inpainting_")
-
         recovered_image_np = main_model.run_inpainting_pipeline(
             damaged_image_source=io.BytesIO(image_bytes),
             output_dir=temp_dir,
-            max_iters=25,
+            max_iters=5,
             use_gpu=False
         )
 
-        print('recovered image finished\n')
-        
         if recovered_image_np is None:
-            raise ValueError("Процесс восстановления вернул None")
-        
-        success, processed_image_bytes = cv2.imencode('.png', recovered_image_np)
+            raise ValueError("Модель вернула None")
 
-        print('cv2 finished\n')
+        print(f"Исходный формат: {recovered_image_np.shape}, {recovered_image_np.dtype}")
+        
+        if recovered_image_np.dtype == np.float64:
+            recovered_image_np = (255 * (recovered_image_np - recovered_image_np.min()) / 
+                                (recovered_image_np.max() - recovered_image_np.min()))
+            recovered_image_np = recovered_image_np.astype(np.uint8)
+        
+        if len(recovered_image_np.shape) == 3 and recovered_image_np.shape[-1] == 3:
+            recovered_image_np = cv2.cvtColor(recovered_image_np, cv2.COLOR_BGR2RGB)
+
+        success, encoded_img = cv2.imencode('.png', recovered_image_np)
         if not success:
-            raise ValueError("Ошибка конвертации изображения в PNG")
-        
-        print('success passed\n')
-        processed_image_bytes = processed_image_bytes.tobytes()
+            raise ValueError("Ошибка кодирования PNG")
+
+        processed_image_bytes = encoded_img.tobytes()
         print('tobytes passed\n')
-        
-            
+          
         file_name = f"processed_{user.id}_{uuid.uuid4().hex}.png"
         file_path = f"users/{user.id}/{file_name}"
 
@@ -87,24 +89,24 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         db_response = supabase_client.table("images").insert(request_data).execute()
         
         print('db response passed\n')
-        with io.BytesIO(processed_image_bytes) as img_buffer:
+        photo_file = BufferedInputFile(
+            file=encoded_img.tobytes(),
+            filename="result.png"
+        )
 
-            photo_file = BufferedInputFile(
-                file=processed_image_bytes,
-                filename="restored.png"
-            )
+        await message.answer_photo(
+            photo=photo_file,
+            caption="✅ Результат обработки"
+        )
 
-            await message.answer_photo(
-                photo=photo_file,
-                caption="✅ Ваше изображение восстановлено!"
-            )
-        print('with... passed\n')
-        
     except Exception as e:
-        await message.answer(_("Произошла ошибка при обработке: {error}").format(error=str(e)))
+        await message.answer(f"Ошибка обработки: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+    finally:
+        if 'temp_dir' in locals():
+            import shutil
+            shutil.rmtree(temp_dir, ignore_errors=True)
     
-    await message.answer(
-        "Выберите действие",
-        reply_markup=menu_buttons()
-    )
-    await state.set_state(Form.is_choosing)
+    await state.set_state(Form.buttons)
