@@ -7,11 +7,11 @@ except ImportError:
     pass
 
 
-def MC_update_X(Z: ArrayLike,
-                lambda_: ArrayLike,
+def MC_update_X(Z: 'ArrayLike',
+                lambda_: 'ArrayLike',
                 r: float,
-                np: BackendModule
-) -> ArrayLike:
+                np: 'BackendModule'
+) -> 'ArrayLike':
     """
     Шаг обновления низкоранговой матрицы X через пороговое сжатие сингулярных чисел (SVT).
     Это соответствует решению задачи: argmin_X ||X||_* + (r/2)||X - Z + U||^2_F
@@ -35,12 +35,12 @@ def MC_update_X(Z: ArrayLike,
     return u @ np.diag(s_thresholded) @ vt
 
 
-def MC_update_Z(X: ArrayLike,
-                lambda_: ArrayLike,
+def MC_update_Z(X: 'ArrayLike',
+                lambda_: 'ArrayLike',
                 r: float,
-                Y: ArrayLike,
-                mask: ArrayLike
-) -> ArrayLike:
+                Y: 'ArrayLike',
+                mask: 'ArrayLike'
+) -> 'ArrayLike':
     """
     Шаг обновления матрицы Z, удовлетворяющей ограничениям на известные пиксели.
     Это соответствует проекции на множество матриц, совпадающих с Y на маске E.
@@ -64,13 +64,13 @@ def MC_update_Z(X: ArrayLike,
     return Z_new
 
 
-def MC_ADMM(Y: ArrayLike,
-            mask: ArrayLike,
+def MC_ADMM(Y: 'ArrayLike',
+            mask: 'ArrayLike',
             tol: float,
             max_iters: int,
             r: float,
-            backend: BackendModule
-) -> Tuple[ArrayLike, List[float]]:
+            backend: 'BackendModule'
+) -> Tuple['ArrayLike', List[float]]:
     """
     Решает задачу матричного дозаполнения с помощью ADMM, управляя итерационным процессом.
 

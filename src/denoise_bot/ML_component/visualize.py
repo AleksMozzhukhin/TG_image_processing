@@ -11,7 +11,7 @@ except ImportError:
     cp = None
 
 
-def show_image(ax: plt.Axes, image: ArrayLike, title: str = "", grid: bool = False):
+def show_image(ax: plt.Axes, image: 'ArrayLike', title: str = "", grid: bool = False):
     """
     Отображает одно изображение на предоставленной оси matplotlib.Axes.
     Автоматически конвертирует CuPy массив в NumPy, если необходимо.
@@ -31,9 +31,9 @@ def show_image(ax: plt.Axes, image: ArrayLike, title: str = "", grid: bool = Fal
 
 
 def save_results_comparison(
-        original: ArrayLike,
-        damaged: ArrayLike,
-        recovered: ArrayLike,
+        original: 'ArrayLike',
+        damaged: 'ArrayLike',
+        recovered: 'ArrayLike',
         output_path: str
 ):
     """

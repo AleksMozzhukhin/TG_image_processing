@@ -1,22 +1,29 @@
 import os
-from typing import Union, Tuple, Type, IO
+from typing import Union, Tuple, IO, NewType
 import cv2
 import numpy as np
+import types
 
 try:
     import cupy as cp
-
     CUPY_AVAILABLE = True
-    ArrayLike = Union[np.ndarray, cp.ndarray]
-    BackendModule = Union[Type[np], Type[cp]]
+
+    #: Псевдоним для массивов, которые могут быть на CPU (NumPy) или GPU (CuPy).
+    ArrayLike = NewType('ArrayLike', Union[np.ndarray, cp.ndarray])
+
+    #: Псевдоним для вычислительного бэкенда (модуль :py:mod:`numpy` или :py:mod:`cupy`).
+    BackendModule = NewType('BackendModule', types.ModuleType)
+
 except ImportError:
     cupy = None
     CUPY_AVAILABLE = False
-    ArrayLike = np.ndarray
-    BackendModule = Type[np]
+
+    # --- То же самое для случая без CuPy ---
+    ArrayLike = NewType('ArrayLike', np.ndarray)
+    BackendModule = NewType('BackendModule', types.ModuleType)
 
 
-def get_backend(use_gpu: bool = True) -> BackendModule:
+def get_backend(use_gpu: bool = True) -> 'BackendModule':
     """
     Возвращает вычислительный бэкенд (NumPy или CuPy) в зависимости от доступности GPU и выбора пользователя.
 
@@ -36,7 +43,7 @@ def get_backend(use_gpu: bool = True) -> BackendModule:
         return np
 
 
-def _ensure_numpy(array: ArrayLike) -> np.ndarray:
+def _ensure_numpy(array: 'ArrayLike') -> np.ndarray:
     """
     Вспомогательная функция, которая гарантирует, что массив находится на CPU (является NumPy массивом).
     Если на вход подан CuPy массив, он будет скопирован на CPU.
@@ -52,7 +59,7 @@ def _ensure_numpy(array: ArrayLike) -> np.ndarray:
     return np.asarray(array)
 
 
-def as_numpy(array: ArrayLike) -> np.ndarray:
+def as_numpy(array: 'ArrayLike') -> np.ndarray:
     """
     Универсальная функция для преобразования CuPy/NumPy массива в NumPy массив (на CPU).
 
@@ -67,7 +74,7 @@ def as_numpy(array: ArrayLike) -> np.ndarray:
     return np.asarray(array)
 
 
-def as_backend_array(array: ArrayLike, backend: BackendModule) -> ArrayLike:
+def as_backend_array(array: 'ArrayLike', backend: 'BackendModule') -> 'ArrayLike':
     """
     Универсальная функция для преобразования массива в массив нужного бэкенда.
 
@@ -122,7 +129,7 @@ def load_image(source: Union[str, IO[bytes]], normalize: bool = True) -> np.ndar
 def generate_mask(shape: Tuple[int, int],
                   known_pixel_ratio: float,
                   seed: int = 42
-) -> np.ndarray:
+                  ) -> np.ndarray:
     """
     Генерирует бинарную NumPy маску, где True означает известный пиксель.
 
@@ -153,7 +160,7 @@ def generate_mask(shape: Tuple[int, int],
     return flat_mask.reshape(shape)
 
 
-def save_image(image_array: ArrayLike, path: str):
+def save_image(image_array: 'ArrayLike', path: str):
     """
     Сохраняет изображение из NumPy или CuPy массива в файл.
 
