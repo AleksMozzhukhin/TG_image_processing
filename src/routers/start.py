@@ -5,21 +5,40 @@ from aiogram.types import Message, CallbackQuery
 import os
 import sys 
 from pathlib import Path 
+import supabase as sb
 
 from keyboards_buttons import language_buttons, menu_buttons
 from routers.button_states import Form
-
-parent_dir = str(Path(__file__).parent.parent.parent)  # на два уровня выше: .parent.parent
-sys.path.append(parent_dir)
-
-from db import db_scripts, db_wares
-
-sys.path.remove(parent_dir)  
+ 
+user_langs = {} 
 
 start = Router()
 
+def set_locale(locale_name):
+    """Set locale for particular user."""
+    locales_path = os.path.join(os.path.dirname(__file__), 'locales')
+
+    try:
+        translation = gettext.translation(
+            "bot",
+            localedir=locales_path,
+            languages=[locale_name],
+            fallback=True
+        )
+        translation.install()
+        global _
+        global ngettext
+        _ = translation.gettext
+        ngettext = translation.ngettext
+    except Exception as e:
+        print(f"Locale error: {e}")
+        translation = gettext.NullTranslations()
+        translation.install()
+        _ = translation.gettext
+        ngettext = translation.ngettext
+
 @start.message(CommandStart())
-async def command_start(message: Message, state: FSMContext, db: db_scripts.Database) -> None:
+async def command_start(message: Message, state: FSMContext, supabase_client: sb.Client) -> None:
     """Обработка команды /start - сначала выбор языка."""
     await state.set_state(Form.set_language)
     await message.answer(
@@ -28,18 +47,14 @@ async def command_start(message: Message, state: FSMContext, db: db_scripts.Data
     )
 
 @start.callback_query(Form.set_language, F.data.startswith("lang_"))
-async def process_language_selection(callback: CallbackQuery, state: FSMContext, db: db_scripts.Database):
+async def process_language_selection(callback: CallbackQuery, state: FSMContext, supabase_client: sb.Client):
     """Обработка выбора языка."""
     language = callback.data.split("_")[1]  
-    #db.set_user_language(callback.from_user.id, language)
-    
-    _.locale = language
-    
-    """if not db.user_exists(callback.from_user.id):
-        db.add_user(callback.from_user.id, callback.from_user.full_name or "Anonymous")"""
+    user_langs[callback.from_user.id] = lang
+    set_locale(lang)
     
     await callback.message.edit_text(
-        text="Выбран русский язык" if language == "ru" else "English language selected",
+        text="Выбран русский язык" if language == "ru_RU" else "English language selected",
         reply_markup=None  
     )
     await state.set_state(Form.menu)

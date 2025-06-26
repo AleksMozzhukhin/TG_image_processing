@@ -33,8 +33,8 @@ def language_buttons() -> ReplyKeyboardMarkup:
     """Показ кнопок выбора языка"""
     builder = ReplyKeyboardBuilder()
 
-    builder.add(KeyboardButton(text=ButtonText.SET_EN))
-    builder.add(KeyboardButton(text=ButtonText.SET_RU))
+    builder.add(KeyboardButton(text=ButtonText.SET_EN, callback_data='lang-ru_RU'))
+    builder.add(KeyboardButton(text=ButtonText.SET_RU, callback_data='lang-en_US'))
     builder.adjust(1)
 
     return builder.as_markup(resize_keyboard=True)
