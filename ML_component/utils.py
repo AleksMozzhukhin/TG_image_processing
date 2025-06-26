@@ -1,5 +1,5 @@
 import os
-from typing import Union, Tuple, Type
+from typing import Union, Tuple, Type, IO
 import cv2
 import numpy as np
 
@@ -84,29 +84,38 @@ def as_backend_array(array: ArrayLike, backend: BackendModule) -> ArrayLike:
     return np.asarray(array)
 
 
-def load_image(path: str, normalize: bool = True) -> np.ndarray:
+def load_image(source: Union[str, IO[bytes]], normalize: bool = True) -> np.ndarray:
     """
-    Загружает изображение из файла с помощью OpenCV, конвертирует в RGB и возвращает как NumPy массив.
+    Загружает изображение из файла или байтового потока.
 
     Args:
-        path (str): Путь к изображению.
+        source (Union[str, IO[bytes]]): Путь к файлу (str) или байтовый поток (например, io.BytesIO).
         normalize (bool): Если True, нормализует значения пикселей в диапазон [0, 1].
 
     Returns:
         np.ndarray: Загруженное изображение в виде NumPy массива (на CPU).
 
     Raises:
-        FileNotFoundError: Если изображение по указанному пути не найдено.
+        ValueError: Если не удалось декодировать изображение из предоставленного источника.
     """
-    image = cv2.imread(path)
-    if image is None:
-        raise FileNotFoundError(f"Не удалось загрузить изображение по пути: {path}")
+    if isinstance(source, str):
+        image = cv2.imread(source)
+        if image is None:
+            raise FileNotFoundError(f"Не удалось загрузить изображение по пути: {source}")
+    else:
+        # Если это байтовый поток, читаем его в NumPy массив
+        file_bytes = np.frombuffer(source.read(), np.uint8)
+        # Декодируем массив байтов в изображение
+        image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+        if image is None:
+            raise ValueError("Не удалось декодировать изображение из байтового потока.")
 
-    # OpenCV загружает изображения в формате BGR, конвертируем в RGB для
-    # корректного отображения в matplotlib и стандартной обработки.
+        # Конвертируем BGR в RGB
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
     if normalize:
         return image_rgb.astype(np.float32) / 255.0
+
     return image_rgb
 
 
