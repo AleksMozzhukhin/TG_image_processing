@@ -13,6 +13,12 @@ from routers.all_routers import all_routers
 
 load_dotenv()
 
+URL = os.getenv("SB_URL")
+KEY = os.getenv("SB_KEY")
+
+SUPABASE_CLIENT = sb.create_client(URL, KEY)
+
+
 async def main():
     """Основная функция для запуска бота."""
     
@@ -28,8 +34,9 @@ async def main():
         token=telegram_token,
         default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN) 
     )
-
     logging.info("Бот запускается...")
+    dispatcher["supabase_client"] = SUPABASE_CLIENT
+    await bot.delete_webhook(drop_pending_updates=True)
     await dispatcher.start_polling(bot)
 
 if __name__ == "__main__":
