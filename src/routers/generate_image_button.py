@@ -9,8 +9,8 @@ from datetime import datetime
 import os
 import supabase as sb
 
-from keyboards_buttons import menu_buttons, ButtonText
-from routers.button_states import Form, GenImage_States
+from ..keyboards_buttons import menu_buttons, ButtonText
+from .button_states import Form, GenImage_States
 
 
 load_dotenv()

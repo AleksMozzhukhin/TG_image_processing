@@ -4,8 +4,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 import supabase as sb
 
-from keyboards_buttons import menu_buttons, ButtonText
-from routers.button_states import Form
+from ..keyboards_buttons import menu_buttons, ButtonText
+from .button_states import Form
 
 view_history = Router()
 

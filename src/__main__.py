@@ -8,8 +8,9 @@ import supabase as sb
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.bot import DefaultBotProperties
+from aiogram.fsm.storage.memory import MemoryStorage # <--- 1. ДОБАВЛЕН ИМПОРТ
 
-from routers.all_routers import all_routers
+from .routers.all_routers import all_routers
 
 
 load_dotenv()
@@ -29,14 +30,22 @@ async def main():
         logging.critical("Не удалось загрузить все переменные окружения! (TOKEN, SUPABASE_URL, SUPABASE_KEY)")
         sys.exit(1)
 
-    dispatcher = Dispatcher()
+    # 2. СОЗДАЕМ ХРАНИЛИЩЕ И ПЕРЕДАЕМ ЕГО В ДИСПЕТЧЕР
+    storage = MemoryStorage()
+    
+    # Передаем зависимости (как storage, так и supabase_client) напрямую в конструктор
+    dispatcher = Dispatcher(storage=storage, supabase_client=SUPABASE_CLIENT)
+    
     dispatcher.include_router(all_routers)
+    
     bot = Bot(
         token=telegram_token,
         default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN) 
     )
     logging.info("Бот запускается...")
-    dispatcher["supabase_client"] = SUPABASE_CLIENT
+    
+    # dispatcher["supabase_client"] = SUPABASE_CLIENT # Этот способ тоже рабочий, но через конструктор чище
+    
     await bot.delete_webhook(drop_pending_updates=True)
     await dispatcher.start_polling(bot)
 

@@ -1,20 +1,24 @@
 from aiogram import Router, html, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 import supabase as sb
+import io
 
-from keyboards_buttons import menu_buttons, ButtonText
-from routers.button_states import Form, DelNoise_States
+from ..keyboards_buttons import menu_buttons, ButtonText
+from .button_states import Form, DelNoise_States
+from tempfile import mkdtemp
+from ML_component import main_model
 
 
 remove_noise = Router()
 
-@remove_noise.message(Form.buttons, F.text == ButtonText.REMOVE_NOISE )
-async def handle_remove_noise(message: Message, state: FSMContext) -> None:
+@remove_noise.callback_query(Form.is_choosing, F.data.startswith("remove_noise"))
+async def handle_remove_noise(callback: CallbackQuery, state: FSMContext) -> None:
+    print('\nENTRED HRNOISE\n')
     """Удалить шум с изображения, начало обработки"""
-    await message.answer(
-        _("Загрузите вышу картинку"),
-        reply_markup=ReplyKeyboardRemove(),
+    await callback.message.answer(
+        "Загрузите вышу картинку",
+        reply_markup=None
     )
     await state.set_state(DelNoise_States.get_image)
 
@@ -25,14 +29,16 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
     
     try:
         image_bytes_io = await message.bot.download(photo.file_id)
-        image_bytes = await image_bytes_io.read()
+        print('image bytes io passed\n')
+        image_bytes = image_bytes_io.read()
+        print('image bytes passed\n')
         temp_dir = mkdtemp(prefix="inpainting_")
 
-        recovered_image_np = run_inpainting_pipeline(
-            damaged_image_source=io.BytesIO(image_bytes),
+        recovered_image_np = main_model.run_inpainting_pipeline(
+            damaged_image_source=image_bytes,
             output_dir=temp_dir,
-            max_iters=250,
-            use_gpu=True
+            max_iters=25,
+            use_gpu=False
         )
         
         if recovered_image_np is None:
@@ -42,7 +48,9 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         if not success:
             raise ValueError("Ошибка конвертации изображения в PNG")
         
+        print('success passed\n')
         processed_image_bytes = processed_image_bytes.tobytes()
+        print('tobytes passed\n')
         
             
         file_name = f"processed_{user.id}_{uuid4().hex}.jpg"
@@ -65,12 +73,14 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         
         db_response = supabase_client.table("images").insert(request_data).execute()
         
+        print('db response passed\n')
         with io.BytesIO(processed_bytes) as img_buffer:
             img_buffer.name = "restored.png"
             await message.answer_photo(
                 img_buffer,
                 caption="✅ Ваше изображение восстановлено!"
             )
+        print('with... passed\n')
         
     except Exception as e:
         await message.answer(_("Произошла ошибка при обработке: {error}").format(error=str(e)))
@@ -79,4 +89,4 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         "Выберите действие",
         reply_markup=menu_buttons()
     )
-    await state.set_state(Form.buttons)
+    await state.set_state(Form.is_choosing)

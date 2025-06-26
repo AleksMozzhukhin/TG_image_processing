@@ -8,8 +8,8 @@ from pathlib import Path
 import supabase as sb
 import gettext
 
-from keyboards_buttons import language_buttons, menu_buttons
-from routers.button_states import Form
+from ..keyboards_buttons import language_buttons, menu_buttons
+from .button_states import Form, DelNoise_States
  
 user_langs = {} 
 
@@ -55,17 +55,26 @@ async def process_language_selection(callback: CallbackQuery, state: FSMContext,
     set_locale(language)
     
     await callback.message.edit_text(
-        text="Выбран русский язык" if language == "ru_RU" else "English language selected",
-        reply_markup=None  
+        text="Выбран русский язык" if language == "RU" else "English language selected",
+        reply_markup=None
     )
-    await show_main_menu(callback.message) 
-    await state.set_state(Form.menu)
+    await callback.message.answer(
+        "Выберите действие:",
+        reply_markup=menu_buttons()
+    )
+
+    print('await choose action finished\n')
+
+    await state.set_state(Form.is_choosing)
     await callback.answer()
 
-@start.message(Form.menu)
+@start.message(Form.buttons)
 async def show_main_menu(message: Message):
-    """Показ главного меню."""
+    """Показ главного меню по текстовому сообщению от пользователя."""
     await message.answer(
         "Выберите действие:",
         reply_markup=menu_buttons()
     )
+    
+    print('SHOW_MAIN_MENU\n')
+    return
