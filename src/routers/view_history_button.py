@@ -1,7 +1,9 @@
 from aiogram import Router, html, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+import datetime
 import supabase as sb
 
 from ..keyboards_buttons import menu_buttons, ButtonText
@@ -9,11 +11,11 @@ from .button_states import Form
 
 view_history = Router()
 
-@view_history.message(Form.buttons, F.text == ButtonText.VIEW_HISTORY)
-async def show_history(message: Message, state: FSMContext, supabase_client: sb.Client):
+@view_history.callback_query(Form.is_choosing, F.data.startswith("view_history"))
+async def handle_view_history(message: Message, state: FSMContext, supabase_client: sb.Client):
     """Показать историю запросов пользователя"""
     user_id = message.from_user.id
-    
+
     try:
         response = supabase_client.table("images")\
             .select("request, created_at, image_url")\
@@ -30,7 +32,7 @@ async def show_history(message: Message, state: FSMContext, supabase_client: sb.
         # Создаем инлайн-кнопки для каждого запроса
         builder = InlineKeyboardBuilder()
         for item in history_items:
-            timestamp = datetime.fromisoformat(item['created_at']).strftime("%d.%m.%Y %H:%M")
+            timestamp = datetime.datetime.fromisoformat(item['created_at']).strftime("%d.%m.%Y %H:%M")
             button_text = f"{item['request'][:30]}... ({timestamp})"
             builder.add(InlineKeyboardButton(
                 text=button_text,
@@ -61,7 +63,7 @@ async def handle_history_select(callback: CallbackQuery):
         # 2. Создаем объект для отправки через Telegram
     image_file = BufferedInputFile(
             file=image_data,
-            filename="generated_image.png"
+            filename="downloaded_image.png"
         )
         
     # 3. Отправляем изображение
