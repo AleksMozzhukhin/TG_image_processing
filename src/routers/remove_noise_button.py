@@ -31,10 +31,12 @@ async def handle_remove_noise(callback: CallbackQuery, state: FSMContext) -> Non
 async def process_received_image(message: Message, state: FSMContext, supabase_client: sb.Client) -> None:
     photo: PhotoSize = message.photo[-1]
     user = message.from_user
-    
+    processing_msg = await message.answer("🔄 Ваше изображение обрабатывается...")
     try:
         image_bytes_io = await message.bot.download(photo.file_id)
         image_bytes = image_bytes_io.read()
+
+        await processing_msg.edit_text("🔄 Обрабатываем изображение нейросетью...")
         
         temp_dir = mkdtemp(prefix="inpainting_")
         recovered_image_np = main_model.run_inpainting_pipeline(
@@ -43,7 +45,7 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
             max_iters=5,
             use_gpu=False
         )
-
+        await processing_msg.edit_text("🔄 Подготавливаем результат...")
         if recovered_image_np is None:
             raise ValueError("Модель вернула None")
 
@@ -96,7 +98,7 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
             file=encoded_img.tobytes(),
             filename="result.jpg"
         )
-
+        await processing_msg.delete()
         await message.answer_photo(
             photo=photo_file,
             caption="✅ Результат обработки"
