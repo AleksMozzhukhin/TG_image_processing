@@ -1,17 +1,24 @@
-.. DenoiseBuddyBot documentation master file, created by
-   sphinx-quickstart on Thu Jun 26 21:32:25 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+======================================
+Документация DenoiseBuddyBot
+======================================
 
-DenoiseBuddyBot documentation
-=============================
+Добро пожаловать в документацию проекта **DenoiseBuddyBot**!
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Этот проект представляет собой многофункционального Telegram-бота, предназначенного для обработки изображений. Он объединяет в себе как сложные алгоритмы машинного обучения для восстановления изображений, так и интеграцию с внешними сервисами для генерации нового контента.
 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Содержание:
 
+   introduction
+   ml_api
+   bot_api
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
