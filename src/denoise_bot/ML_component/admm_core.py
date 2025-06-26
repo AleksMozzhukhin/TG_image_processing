@@ -3,7 +3,7 @@ from typing import List, Tuple
 from .utils import ArrayLike, BackendModule
 
 try:
-    import cupy
+    import cupy  # noqa F401
 except ImportError:
     pass
 
@@ -12,6 +12,8 @@ def MC_update_X(
     Z: "ArrayLike", lambda_: "ArrayLike", r: float, np: "BackendModule"
 ) -> "ArrayLike":
     """
+    Обновление матрицы X.
+
     Шаг обновления низкоранговой матрицы X через пороговое сжатие сингулярных чисел (SVT).
     Это соответствует решению задачи: argmin_X ||X||_* + (r/2)||X - Z + U||^2_F
 
@@ -22,7 +24,8 @@ def MC_update_X(
         np (BackendModule): Вычислительный бэкенд (модуль numpy или cupy).
 
     Returns:
-        ArrayLike: Обновленная низкоранговая матрица X того же типа, что и входные.
+        ArrayLike: Обновленная низкоранговая матрица X
+            того же типа, что и входные.
     """
     matrix_to_decompose = Z - lambda_ / r
     u, s, vt = np.linalg.svd(matrix_to_decompose, full_matrices=False)
@@ -38,6 +41,8 @@ def MC_update_Z(
     X: "ArrayLike", lambda_: "ArrayLike", r: float, Y: "ArrayLike", mask: "ArrayLike"
 ) -> "ArrayLike":
     """
+    Обновление матрицы Z.
+
     Шаг обновления матрицы Z, удовлетворяющей ограничениям на известные пиксели.
     Это соответствует проекции на множество матриц, совпадающих с Y на маске E.
 
@@ -69,7 +74,10 @@ def MC_ADMM(
     backend: "BackendModule",
 ) -> Tuple["ArrayLike", List[float]]:
     """
-    Решает задачу матричного дозаполнения с помощью ADMM, управляя итерационным процессом.
+    Дозаполняет матрицу с помощью ADMM.
+
+    Решает задачу матричного дозаполнения с помощью ADMM,
+    управляя итерационным процессом.
 
     Args:
         Y (ArrayLike): Исходная матрица (канал изображения) с пропусками.
@@ -84,7 +92,6 @@ def MC_ADMM(
             - Восстановленную матрицу X (на том же бэкенде, что и входные данные).
             - Историю значений ядерной нормы (список чисел float).
     """
-
     height, width = Y.shape
 
     # Инициализация переменных

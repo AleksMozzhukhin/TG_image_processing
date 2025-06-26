@@ -27,7 +27,10 @@ except ImportError:
 
 def get_backend(use_gpu: bool = True) -> "BackendModule":
     """
-    Возвращает вычислительный бэкенд (NumPy или CuPy) в зависимости от доступности GPU и выбора пользователя.
+    Выбор бэкенда.
+
+    Возвращает вычислительный бэкенд (NumPy или CuPy) в зависимости от
+    доступности GPU и выбора пользователя.
 
     Args:
         use_gpu (bool): Флаг, указывающий, нужно ли пытаться использовать GPU.
@@ -49,7 +52,9 @@ def get_backend(use_gpu: bool = True) -> "BackendModule":
 
 def _ensure_numpy(array: "ArrayLike") -> np.ndarray:
     """
-    Вспомогательная функция, которая гарантирует, что массив находится на CPU (является NumPy массивом).
+    Определяет местонахождение массива.
+
+    Вспомогательная функция, которая гарантирует, что массив находится на CPU.
     Если на вход подан CuPy массив, он будет скопирован на CPU.
 
     Args:
@@ -100,7 +105,7 @@ def load_image(source: Union[str, IO[bytes]], normalize: bool = True) -> np.ndar
     Загружает изображение из файла или байтового потока.
 
     Args:
-        source (Union[str, IO[bytes]]): Путь к файлу (str) или байтовый поток (например, io.BytesIO).
+        source (Union[str, IO[bytes]]): Путь к файлу (str) или байтовый поток (io.BytesIO).
         normalize (bool): Если True, нормализует значения пикселей в диапазон [0, 1].
 
     Returns:

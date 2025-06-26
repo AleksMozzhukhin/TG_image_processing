@@ -10,17 +10,21 @@ def create_mask_from_damaged(
     damaged_image: np.ndarray, threshold: int = 10
 ) -> np.ndarray:
     """
-    Создает маску известных пикселей на основе поврежденного изображения (работает с NumPy массивами).
-    Пиксель считается известным, если он не является почти черным.
+    Отвечает за создание маски для матрицы.
+
+    Создает маску известных пикселей на основе поврежденного изображения
+    (работает с NumPy массивами). Пиксель считается известным,
+    если он не является почти черным.
 
     Args:
-        damaged_image (np.ndarray): Входное изображение в формате NumPy (H, W, C).
-        threshold (int): Порог яркости для определения черного пикселя (в диапазоне 0-255).
+        damaged_image (np.ndarray): Входное изображение в формате NumPy
+            (H, W, C).
+        threshold (int): Порог яркости для определения черного пикселя
+            (в диапазоне 0-255).
 
     Returns:
         np.ndarray: Двумерная булева маска, где True означает известный (неповрежденный) пиксель.
     """
-
     # Суммируем значения каналов, чтобы получить одноканальное изображение
     gray_image = damaged_image.sum(axis=2)
 
@@ -74,16 +78,15 @@ def run_inpainting_pipeline(
             Восстановленное изображение в виде NumPy массива (на CPU) в случае
             успешного выполнения. Возвращает None, если в процессе произошла ошибка.
     """
-
     # --- 1. Выбор бэкенда и настройка путей ---
     backend = utils.get_backend(use_gpu)
 
     os.makedirs(output_dir, exist_ok=True)
 
     # Формируем пути для сохранения результатов
-    RECOVERED_IMAGE_PATH = os.path.join(output_dir, f"recovered.png")
-    COMPARISON_PLOT_PATH = os.path.join(output_dir, f"comparison.png")
-    CONVERGENCE_PLOT_PATH = os.path.join(output_dir, f"convergence.png")
+    RECOVERED_IMAGE_PATH = os.path.join(output_dir, "recovered.png")
+    COMPARISON_PLOT_PATH = os.path.join(output_dir, "comparison.png")
+    CONVERGENCE_PLOT_PATH = os.path.join(output_dir, "convergence.png")
 
     # Параметры ADMM
     ADMM_TOL = 1e-3
@@ -91,7 +94,7 @@ def run_inpainting_pipeline(
 
     try:
         # --- 2. Загрузка данных (всегда на CPU) ---
-        print(f"Загрузка поврежденного изображения...")
+        print("Загрузка поврежденного изображения...")
         damaged_image_np = utils.load_image(damaged_image_source)
 
         # --- 3. Создание маски и перенос на выбранный бэкенд ---
@@ -142,7 +145,7 @@ def run_inpainting_pipeline(
         )
 
         if original_image_source:
-            print(f"Загрузка оригинального изображения для сравнения...")
+            print("Загрузка оригинального изображения для сравнения...")
             original_image_np = utils.load_image(original_image_source)
             visualize.save_results_comparison(
                 original_image_np,
