@@ -87,26 +87,25 @@ def MC_ADMM(Y: ArrayLike,
             - Восстановленную матрицу X (на том же бэкенде, что и входные данные).
             - Историю значений ядерной нормы (список чисел float).
     """
-    np = backend
 
     height, width = Y.shape
 
     # Инициализация переменных
-    X = np.random.rand(height, width)
-    Z = np.random.rand(height, width)
-    lambda_ = np.zeros_like(Y)
+    X = backend.random.rand(height, width)
+    Z = backend.random.rand(height, width)
+    lambda_ = backend.zeros_like(Y)
 
     # Начальная проекция, чтобы Z с самого начала удовлетворял ограничениям
     Z[mask] = Y[mask]
 
     # Инициализация истории для отслеживания сходимости
-    u, s, v = np.linalg.svd(X, compute_uv=True)
-    norm_prev = np.sum(s).get().item() if hasattr(s, 'get') else np.sum(s).item()
+    u, s, v = backend.linalg.svd(X, compute_uv=True)
+    norm_prev = backend.sum(s).get().item() if hasattr(s, 'get') else backend.sum(s).item()
     norms_history = [norm_prev]
 
     for i in range(max_iters):
         # Шаг 1: Обновление X (SVT)
-        X = MC_update_X(Z, lambda_, r, np)
+        X = MC_update_X(Z, lambda_, r, backend)
 
         # Шаг 2: Обновление Z (Проекция)
         Z = MC_update_Z(X, lambda_, r, Y, mask)
@@ -115,9 +114,9 @@ def MC_ADMM(Y: ArrayLike,
         lambda_ += (X - Z) * r
 
         # Проверка сходимости по изменению ядерной нормы
-        u, s, v = np.linalg.svd(X, compute_uv=True)
+        u, s, v = backend.linalg.svd(X, compute_uv=True)
 
-        norm_current = np.sum(s).get().item() if hasattr(s, 'get') else np.sum(s).item()
+        norm_current = backend.sum(s).get().item() if hasattr(s, 'get') else backend.sum(s).item()
         norms_history.append(norm_current)
 
         # abs() для обычных чисел Python, np.abs() для массивов
