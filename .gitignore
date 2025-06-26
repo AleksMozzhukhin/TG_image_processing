@@ -6,3 +6,6 @@
 */__pycache__/
 *.pyc
 __pycache__
+docs/build
+docs/source/_static
+docs/source/_templates

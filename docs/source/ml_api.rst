@@ -8,7 +8,7 @@
 --------------------
 Этот модуль является точкой входа для запуска процесса восстановления изображения.
 
-.. automodule:: ML_component.main_model
+.. automodule:: denoise_bot.ML_component.main_model
    :members:
    :undoc-members:
    :show-inheritance:
@@ -17,7 +17,7 @@
 -------------------------
 Здесь реализованы математические шаги алгоритма матричного дозаполнения.
 
-.. automodule:: ML_component.admm_core
+.. automodule:: denoise_bot.ML_component.admm_core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -26,7 +26,7 @@
 --------------------------
 Функции для загрузки/сохранения, работы с бэкендами (CPU/GPU) и генерации масок.
 
-.. automodule:: ML_component.utils
+.. automodule:: denoise_bot.ML_component.utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -35,7 +35,7 @@
 ----------------------------
 Создание сравнительных графиков и графиков сходимости.
 
-.. automodule:: ML_component.visualize
+.. automodule:: denoise_bot.ML_component.visualize
    :members:
    :undoc-members:
    :show-inheritance:
