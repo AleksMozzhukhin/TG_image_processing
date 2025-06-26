@@ -3,48 +3,45 @@ import asyncio
 import logging
 import sys
 from dotenv import load_dotenv
-from pathlib import Path 
 
-from aiogram import Bot
-from aiogram import Dispatcher
+from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.bot import DefaultBotProperties
 
+from supabase import create_client, Client
 
 from routers.all_routers import all_routers
-
-parent_dir = str(Path(__file__).parent.parent)  # на два уровня выше: .parent.parent
-sys.path.append(parent_dir)
-
-from db import db_scripts, db_wares
-
-sys.path.remove(parent_dir)  
+from .db.db_wares import SupabaseMiddleware
 
 load_dotenv()
 
 async def main():
-    """Создание базой конфигурации бота"""
-    dispatcher = Dispatcher()
-    dispatcher.include_router(all_routers)
-    #Разкомментить на девелопе и прочекать 
-    db_instance = db_scripts.Database()
-    dp.update.middleware(db_wares.DatabaseWares(db=db_instance))
-    if not (TELEGRAM_TOKEN := os.getenv("TELEGRAM_BOT_TOKEN")): 
-        print("Telegram token not found! Install telegram token!")
-        sys.exit(1)
-    bot = Bot(
-        token=TELEGRAM_TOKEN,
-        default=DefaultBotProperties(
-            parse_mode=ParseMode.HTML
-        )
-    )
-    await dispatcher.start_polling(bot)
+    """Основная функция для запуска бота."""
+    
+    telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_KEY")
 
+    if not all([telegram_token, supabase_url, supabase_key]):
+        logging.critical("Не удалось загрузить все переменные окружения! (TOKEN, SUPABASE_URL, SUPABASE_KEY)")
+        sys.exit(1)
+
+    supabase_client: Client = create_client(supabase_url, supabase_key)
+    dispatcher = Dispatcher()
+    dispatcher.update.outer_middleware.register(SupabaseMiddleware(supabase_client))
+    dispatcher.include_router(all_routers)
+    bot = Bot(
+        token=telegram_token,
+        default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN) 
+    )
+
+    logging.info("Бот запускается...")
+    await dispatcher.start_polling(bot)
 
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
         stream=sys.stdout,
-        format="%(asctime)s - [%(levelname)s] -  %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"  # noqa: E501
+        format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"
     )
     asyncio.run(main())
