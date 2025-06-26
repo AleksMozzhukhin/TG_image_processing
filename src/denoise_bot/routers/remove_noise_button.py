@@ -1,16 +1,20 @@
+from aiogram import Router, html, F
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, CallbackQuery, BufferedInputFile
+import supabase as sb
 import datetime
 import io
 import uuid
+import numpy as np
+
+from ..keyboards_buttons import menu_buttons, ButtonText
 from tempfile import mkdtemp
 
 import cv2
-import numpy as np
-import supabase as sb
 from aiogram import F, Router, html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
-from ..keyboards_buttons import ButtonText, menu_buttons
 from ..ML_component import main_model
 from .button_states import DelNoise_States, Form
 
@@ -62,26 +66,29 @@ async def process_received_image(
         if len(recovered_image_np.shape) == 3 and recovered_image_np.shape[-1] == 3:
             recovered_image_np = cv2.cvtColor(recovered_image_np, cv2.COLOR_BGR2RGB)
 
-        success, encoded_img = cv2.imencode(".png", recovered_image_np)
+        success, encoded_img = cv2.imencode('.jpg', recovered_image_np)
         if not success:
-            raise ValueError("Ошибка кодирования PNG")
+            raise ValueError("Ошибка кодирования jpg")
 
         processed_image_bytes = encoded_img.tobytes()
-        print("tobytes passed\n")
-
-        file_name = f"processed_{user.id}_{uuid.uuid4().hex}.png"
+        print('tobytes passed\n')
+          
+        file_name = f"processed_{user.id}_{uuid.uuid4().hex}.jpg"
         file_path = f"users/{user.id}/{file_name}"
 
-        # storage_response = supabase_client.storage.from_("images").upload(
-        #     path=file_path,
-        #     file=processed_image_bytes,
-        #     file_options={"content-type": "image/png"}
-        # )
+        print("\n", file_path, "\n", "file path")
 
-        print("storage response passed\n")
+        storage_response = supabase_client.storage.from_("images").upload(
+            path=file_path,
+            file=processed_image_bytes,
+            file_options={"content-type": "image/*"}
+        )
 
-        image_url = "https://google.com"  # supabase_client.storage.from_("images").get_public_url(file_path)
+        print('storage response passed\n')
+        print(storage_response)
 
+        image_url = supabase_client.storage.from_("images").get_public_url(file_path)
+        
         request_data = {
             "created_at": datetime.datetime.now().isoformat(),
             "user_id": user.id,
@@ -95,7 +102,8 @@ async def process_received_image(
 
         print("db response passed\n")
         photo_file = BufferedInputFile(
-            file=encoded_img.tobytes(), filename="result.png"
+            file=encoded_img.tobytes(),
+            filename="result.jpg"
         )
 
         await message.answer_photo(photo=photo_file, caption="✅ Результат обработки")

@@ -1,16 +1,17 @@
 import os
 import random
-
+from aiogram.types import FSInputFile
 from aiogram import F, Router
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from aiogram.types import FSInputFile, Message
 
 from ..keyboards_buttons import ButtonText, menu_buttons
-from .button_states import Form
+from .button_states import Form, MAGIC_state
 
 magic = Router()
 
-CATS_IMAGES_DIR = "images/cats/"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CATS_IMAGES_DIR = os.path.join(BASE_DIR, "cats")
 
 CUTE_CAPTIONS = [
     "Мур-мур-мур! 😻",
@@ -25,30 +26,34 @@ CUTE_CAPTIONS = [
     "Мурчание передается через фото!",
 ]
 
+@magic.callback_query(Form.is_choosing, F.data.startswith("magic_action"))
+async def handle_magic_button(callback: CallbackQuery, state: FSMContext) -> None:
+    """Обработчик нажатия на кнопку - отправляет котиков сразу"""
+    print('ENTERED\n')
+    await callback.answer()
 
-@magic.message(Form.buttons, F.text == ButtonText.MAGIC)
-async def handle_magic_button(message: Message, state: FSMContext) -> None:
-    """Используйте волшебную кнопку — отправляйте случайные фотографии котиков с милыми подписями"""
-    num_images = random.randint(1, 5)
+    try:
+        cat_images = [f for f in os.listdir(CATS_IMAGES_DIR)
+                     if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
 
-    # cat_images = db.get_random_cat_images(num_images)
+        if not cat_images:
+            await callback.message.answer("Котики куда-то убежали... Попробуйте позже!")
+            return
 
-    cat_images = [
-        f
-        for f in os.listdir(CATS_IMAGES_DIR)
-        if f.lower().endswith((".jpg", ".jpeg", ".png"))
-    ]
+        num_images = min(random.randint(1, 5), len(cat_images))
+        selected_images = random.sample(cat_images, num_images)
 
-    if not cat_images:
-        await message.answer(_("Котики куда-то убежали... Попробуйте позже!"))
-        return
+        for image_name in selected_images:
+            image_path = os.path.join(CATS_IMAGES_DIR, image_name)
+            caption = random.choice(CUTE_CAPTIONS)
+            photo = FSInputFile(image_path)
+            await callback.message.answer_photo(photo, caption=caption)
 
-    # Отправляем каждую картинку с случайной подписью
-    for image_name in selected_images:
-        image_path = os.path.join(CATS_IMAGES_DIR, image_name)
-        caption = random.choice(CUTE_CAPTIONS)
-        photo = FSInputFile(image_path)
-        await message.answer_photo(photo, caption=caption)
+        await callback.message.answer("Вот ваша порция котиков! 😊",
+                             reply_markup=menu_buttons())
 
-    await message.answer(_("Вот ваша порция котиков! 😊"), reply_markup=menu_buttons())
-    await state.set_state(Form.buttons)
+        await state.set_state(Form.is_choosing)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        await callback.message.answer("Произошла ошибка при загрузке котиков 😿")

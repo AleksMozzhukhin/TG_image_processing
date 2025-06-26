@@ -159,3 +159,4 @@ websockets==15.0.1
     # via realtime
 yarl==1.20.1
     # via aiohttp
+requests==2.26.0
