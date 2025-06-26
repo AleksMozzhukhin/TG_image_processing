@@ -6,6 +6,7 @@ class Form(StatesGroup):
     set_language = State()
     menu = State()
     buttons = State()
+    is_choosing = State()
 
 class DelNoise_States(StatesGroup): 
     """Состояния кнопки удалить шум"""
