@@ -2,7 +2,10 @@
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
+import os
+import sys
 
+sys.path.insert(0, os.path.abspath('../../src'))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -14,7 +17,12 @@ release = '1.0.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [
+    'sphinx.ext.autodoc',  # Главное расширение для импорта докстрингов
+    'sphinx.ext.napoleon',  # Для поддержки докстрингов в стиле Google и NumPy
+    'sphinx.ext.viewcode',  # Добавляет ссылки на исходный код
+    'sphinx.ext.intersphinx',  # Для ссылок на документацию других проектов
+]
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -24,5 +32,10 @@ language = 'ru'
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
+html_theme = 'furo'
 html_static_path = ['_static']
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+}
