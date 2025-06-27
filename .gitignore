@@ -7,7 +7,7 @@
 *.pyc
 __pycache__
 docs/build
-docs/source/_static
 docs/source/_templates
 */denoise_bot.egg-info
 *.mo
+.doit.db
