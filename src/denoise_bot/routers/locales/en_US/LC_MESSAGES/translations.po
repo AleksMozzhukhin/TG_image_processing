@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-06-27 04:04+0300\n"
+"POT-Creation-Date: 2025-06-27 05:29+0300\n"
 "PO-Revision-Date: 2025-06-27 04:12+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
@@ -32,11 +32,12 @@ msgstr "Your image is ready!"
 
 #: src/denoise_bot/routers/generate_image_button.py:87
 #, fuzzy, python-brace-format
-msgid "Произошла ошибка при обработке: {error}"
+msgid "Произошла ошибка при обработке: {}"
 msgstr "An error occurred while processing: {}"
 
 #: src/denoise_bot/routers/generate_image_button.py:90
-#: src/denoise_bot/routers/start.py:71 src/denoise_bot/routers/start.py:84
+#: src/denoise_bot/routers/start.py:115 src/denoise_bot/routers/start.py:128
+#: src/denoise_bot/routers/view_history_button.py:130
 msgid "Выберите действие:"
 msgstr "Select action:"
 
@@ -54,7 +55,7 @@ msgstr "There was an error loading cats 😿"
 
 #: src/denoise_bot/routers/remove_noise_button.py:24
 #, fuzzy
-msgid "Загрузите вышу картинку"
+msgid "Загрузите вашу картинку"
 msgstr "Upload your picture"
 
 #: src/denoise_bot/routers/remove_noise_button.py:36
@@ -81,7 +82,57 @@ msgstr "jpg encoding error"
 msgid "✅ Результат обработки"
 msgstr "✅ Processing result"
 
+#: src/denoise_bot/routers/start.py:64
+msgid "Удалить шум с изображения"
+msgstr "Remove noise from an image"
+
 #: src/denoise_bot/routers/start.py:67
+msgid "Сгенерировать изображение"
+msgstr "Generate an image"
+
+#: src/denoise_bot/routers/start.py:70
+msgid "Посмотреть историю"
+msgstr "View history"
+
+#: src/denoise_bot/routers/start.py:73
+msgid "Магия"
+msgstr "Magic"
+
+#: src/denoise_bot/routers/start.py:111
 msgid "Выбран русский язык"
 msgstr "English language selected"
+
+#: src/denoise_bot/routers/view_history_button.py:33
+msgid "У вас еще нет истории запросов."
+msgstr "You don't have any search history yet."
+
+#: src/denoise_bot/routers/view_history_button.py:53
+msgid "🚪 Выйти из истории"
+msgstr "🚪 Exit history"
+
+#: src/denoise_bot/routers/view_history_button.py:59
+msgid "Ваши предыдущие запросы:"
+msgstr "Your previous requests:"
+
+#: src/denoise_bot/routers/view_history_button.py:66
+#, python-brace-format
+msgid "Ошибка при получении истории: {}"
+msgstr "Error getting history: {}"
+
+#: src/denoise_bot/routers/view_history_button.py:82
+msgid "❌ Изображение не найдено"
+msgstr "❌ Image not found"
+
+#: src/denoise_bot/routers/view_history_button.py:95
+#, python-brace-format
+msgid "🖼️ Запрос: {}"
+msgstr "🖼️ Request: {}"
+
+#: src/denoise_bot/routers/view_history_button.py:117
+msgid "❌ Ошибка загрузки"
+msgstr "❌ Loading error"
+
+#: src/denoise_bot/routers/view_history_button.py:126
+msgid "Вы вернулись в главное меню:"
+msgstr "You have returned to the main menu:"
 

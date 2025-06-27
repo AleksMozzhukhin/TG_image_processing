@@ -8,7 +8,7 @@ import supabase as sb
 import httpx
 from aiogram.types import BufferedInputFile
 
-from src.denoise_bot.routers.keyboards_buttons import menu_buttons, ButtonText
+from .start import menu_buttons
 from .button_states import Form, History_state
 
 view_history = Router()
@@ -30,7 +30,7 @@ async def handle_view_history(callback: CallbackQuery, state: FSMContext, supaba
         history_data = {}
 
         if not history_items:
-            await callback.message.answer("У вас еще нет истории запросов.")
+            await callback.message.answer(_("У вас еще нет истории запросов."))
             return
 
         builder = InlineKeyboardBuilder()
@@ -50,20 +50,20 @@ async def handle_view_history(callback: CallbackQuery, state: FSMContext, supaba
             ))
         await state.update_data(history_data=history_data)
         builder.row(InlineKeyboardButton(
-            text="🚪 Выйти из истории",
+            text=_("🚪 Выйти из истории"),
             callback_data="exit_history"
         ))
 
         builder.adjust(1)
         await callback.message.answer(
-            "Ваши предыдущие запросы:",
+            _("Ваши предыдущие запросы:"),
             reply_markup=builder.as_markup()
         )
         await state.set_state(History_state)
         # await callback.answer()
 
     except Exception as e:
-        await callback.message.answer(f"Ошибка при получении истории: {str(e)}")
+        await callback.message.answer(_("Ошибка при получении истории: {}").format(str(e)))
         await callback.answer()
 
 
@@ -79,7 +79,7 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
         item = history_data.get(item_id)
 
         if not item:
-            await callback.answer("❌ Изображение не найдено", show_alert=True)
+            await callback.answer(_("❌ Изображение не найдено"), show_alert=True)
             return
 
         async with httpx.AsyncClient() as client:
@@ -92,7 +92,7 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
                 file=image_data,
                 filename="downloaded_image.png"
             ),
-            caption=f"🖼️ Запрос: {item['request'][:200]}"
+            caption=_("🖼️ Запрос: {}").format(item['request'][:200])
         )
         # builder = InlineKeyboardBuilder()
         # for item_id, item_data in history_data.items():
@@ -114,7 +114,7 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
         # )
 
     except Exception as e:
-        await callback.answer("❌ Ошибка загрузки", show_alert=True)
+        await callback.answer(_("❌ Ошибка загрузки"), show_alert=True)
         print(f"Error: {repr(e)}")
 
 
@@ -123,11 +123,11 @@ async def handle_exit_history(callback: CallbackQuery, state: FSMContext):
     """Выход из режима просмотра истории"""
     await callback.answer()
     await callback.message.edit_text(
-        "Вы вернулись в главное меню:",
+        _("Вы вернулись в главное меню:"),
         reply_markup=None
     )
     await callback.message.answer(
-        "Выберите действие:",
+        _("Выберите действие:"),
         reply_markup=menu_buttons()
     )
     await state.set_state(Form.is_choosing)

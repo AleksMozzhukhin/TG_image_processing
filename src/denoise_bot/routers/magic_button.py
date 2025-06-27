@@ -5,7 +5,7 @@ from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from src.denoise_bot.routers.keyboards_buttons import ButtonText, menu_buttons
+from .start import menu_buttons
 from .button_states import Form
 
 magic = Router()
