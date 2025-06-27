@@ -31,7 +31,7 @@ jobs:
       # 4. Собираем документацию с помощью doit
       # Используем doit, так как он уже настроен
       - name: Build documentation
-        run: doit docs
+        run: python -m doit docs
 
       # 5. Деплоим собранную документацию на GitHub Pages
       - name: Deploy to GitHub Pages
