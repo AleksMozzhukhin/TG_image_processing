@@ -11,7 +11,7 @@ import numpy as np
 from ..keyboards_buttons import menu_buttons, ButtonText
 from .button_states import Form, DelNoise_States
 from tempfile import mkdtemp
-from ML_component import main_model
+from ..ML_component import main_model
 
 
 remove_noise = Router()
