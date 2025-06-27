@@ -25,3 +25,6 @@ sphinx-autodoc-typehints
 
 # Инструменты для локализации
 babel
+
+# Автоматизация
+doit
