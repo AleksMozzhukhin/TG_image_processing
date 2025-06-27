@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,10 +7,60 @@ name = "denoise_bot"
 version = "1.0.0"
 description = "A Telegram bot for image inpainting and denoising."
 readme = "README.md"
-requires-python = ">=3.12.3"
+requires-python = ">=3.12"
+
+dependencies = [
+    "aiogram==3.20.0",
+    "cupy-cuda12x==13.4.1",
+    "matplotlib==3.10.3",
+    "numpy==2.2.6",
+    "opencv-python-headless==4.11.0.86",
+    "psycopg[binary]==3.2.9",
+    "python-dotenv==1.1.1",
+    "supabase==2.16.0",
+    "requests==2.26.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "black==25.1.0",
+    "flake8==7.3.0",
+    "flake8-docstrings==1.7.0",
+    "isort==6.0.1",
+    "pip-tools==7.4.1",
+    "pre-commit==4.2.0",
+    "pydocstyle[toml]==6.3.0",
+    "pytest==8.4.1",
+    "pytest-mock==3.14.1",
+    "Sphinx==8.2.3",
+    "sphinx-autobuild==2024.10.3",
+    "sphinx-autodoc-typehints==3.2.0",
+    "babel==2.17.0",
+    "build"
+]
+
+[project.scripts]
+denoise-bot = "denoise_bot.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/AleksMozzhukhin/TG_image_processing"
+Repository = "https://github.com/AleksMozzhukhin/TG_image_processing"
+
+[tool.setuptools]
+packages = ["denoise_bot"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+denoise_bot = [
+    "routers/cats/*.jpg",
+    "routers/locales/**/*.mo",
+]
+[tool.setuptools.data-files]
+"share/doc/denoise_bot" = ["docs/build/html/**"]
 
 [tool.isort]
 profile = "black"
+line-length = 120
 
 [tool.black]
 line-length = 120
