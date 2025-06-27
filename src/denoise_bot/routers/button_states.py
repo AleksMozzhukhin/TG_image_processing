@@ -20,3 +20,5 @@ class GenImage_States(StatesGroup):
     """Состояния кнопки для генерации картинки"""
 
     waiting_for_prompt = State()
+
+History_state = State()

@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from ..keyboards_buttons import ButtonText, menu_buttons
-from .button_states import Form, MAGIC_state
+from .button_states import Form
 
 magic = Router()
 
@@ -29,15 +29,14 @@ CUTE_CAPTIONS = [
 @magic.callback_query(Form.is_choosing, F.data.startswith("magic_action"))
 async def handle_magic_button(callback: CallbackQuery, state: FSMContext) -> None:
     """Обработчик нажатия на кнопку - отправляет котиков сразу"""
-    print('ENTERED\n')
     await callback.answer()
-
+    
     try:
-        cat_images = [f for f in os.listdir(CATS_IMAGES_DIR)
+        cat_images = [f for f in os.listdir(CATS_IMAGES_DIR) 
                      if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
 
         if not cat_images:
-            await callback.message.answer("Котики куда-то убежали... Попробуйте позже!")
+            await callback.message.answer(_("Котики куда-то убежали... Попробуйте позже!"))
             return
 
         num_images = min(random.randint(1, 5), len(cat_images))
@@ -48,12 +47,11 @@ async def handle_magic_button(callback: CallbackQuery, state: FSMContext) -> Non
             caption = random.choice(CUTE_CAPTIONS)
             photo = FSInputFile(image_path)
             await callback.message.answer_photo(photo, caption=caption)
-
-        await callback.message.answer("Вот ваша порция котиков! 😊",
+        
+        await callback.message.answer(_("Вот ваша порция котиков! 😊"),
                              reply_markup=menu_buttons())
 
         await state.set_state(Form.is_choosing)
 
     except Exception as e:
-        print(f"Error: {e}")
-        await callback.message.answer("Произошла ошибка при загрузке котиков 😿")
+        await callback.message.answer(_("Произошла ошибка при загрузке котиков 😿"))
