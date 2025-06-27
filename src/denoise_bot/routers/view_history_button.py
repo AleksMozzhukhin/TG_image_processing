@@ -13,25 +13,26 @@ from .button_states import Form, History
 
 view_history = Router()
 
+
 @view_history.callback_query(Form.is_choosing, F.data.startswith("view_history"))
 async def handle_view_history(callback: CallbackQuery, state: FSMContext, supabase_client: sb.Client):
     """Показать историю запросов пользователя"""
     user_id = callback.from_user.id
     try:
-        await callback.answer() 
-        response = supabase_client.table("images")\
-            .select("id, request, created_at, image_url")\
-            .eq("user_id", user_id)\
-            .order("created_at", desc=True)\
+        await callback.answer()
+        response = supabase_client.table("images") \
+            .select("id, request, created_at, image_url") \
+            .eq("user_id", user_id) \
+            .order("created_at", desc=True) \
             .execute()
-        
+
         history_items = response.data
         history_data = {}
 
         if not history_items:
             await callback.message.answer(_("У вас еще нет истории запросов."))
             return
-        
+
         builder = InlineKeyboardBuilder()
         for item in history_items:
             item_id = str(item['id'])
@@ -52,18 +53,19 @@ async def handle_view_history(callback: CallbackQuery, state: FSMContext, supaba
             text=_("🚪 Выйти из истории"),
             callback_data="exit_history"
         ))
-        
+
         builder.adjust(1)
         await callback.message.answer(
             _("Ваши предыдущие запросы:"),
             reply_markup=builder.as_markup()
         )
         await state.set_state(History.view_hist)
-        #await callback.answer()
-        
+        # await callback.answer()
+
     except Exception as e:
         await callback.message.answer(_("Ошибка при получении истории: {}").format(str(e)))
         await callback.answer()
+
 
 @view_history.callback_query(History.view_hist, F.data.startswith("show_image:"))
 async def handle_history_select(callback: CallbackQuery, state: FSMContext):
@@ -75,21 +77,21 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
         state_data = await state.get_data()
         history_data = state_data.get('history_data', {})
         item = history_data.get(item_id)
-        
+
         if not item:
             await callback.answer(_("❌ Изображение не найдено"), show_alert=True)
             return
-        
+
         async with httpx.AsyncClient() as client:
             response = await client.get(item['image_url'])
             response.raise_for_status()
             image_data = response.content
-        
+
         await callback.message.answer_photo(
             BufferedInputFile(
-            file=image_data,
-            filename="downloaded_image.png"
-        ),
+                file=image_data,
+                filename="downloaded_image.png"
+            ),
             caption=_("🖼️ Запрос: {}").format(item['request'][:200])
         )
         builder = InlineKeyboardBuilder()
@@ -101,16 +103,17 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
             text=_("🚪 Выйти из истории"),
             callback_data="exit_history"
         ))
-        
+
         await callback.message.answer(
             _("Вы можете вернуться к списку запросов:"),
             reply_markup=builder.as_markup()
         )
         await state.set_state(History.view_again)
- 
+
     except Exception as e:
         await callback.answer(_("❌ Ошибка загрузки"), show_alert=True)
         print(f"Error: {repr(e)}")
+
 
 @view_history.callback_query(History.view_again, F.data == "back_to_history")
 async def return_to_history_list(callback: CallbackQuery, state: FSMContext, supabase_client: sb.Client):
@@ -121,23 +124,23 @@ async def return_to_history_list(callback: CallbackQuery, state: FSMContext, sup
 
         state_data = await state.get_data()
         user_id = callback.from_user.id
-        
+
         # Создаем искусственный callback объект для повторного вызова handle_view_history
         class ArtificialCallback:
             def __init__(self):
                 self.message = callback.message
                 self.from_user = callback.from_user
                 self.data = "view_history"  # Имитируем исходный callback
-        
+
         # Вызываем исходную функцию показа истории
-        await handle_view_history(ArtificialCallback(), state, supabase_client)
-        
+        await handle_view_history(callback, state, supabase_client)
+
         # Удаляем временное сообщение с кнопкой "Назад"
         try:
             await callback.message.delete()
         except:
             pass
-            
+
     except Exception as e:
         await callback.answer(_("❌ Не удалось загрузить историю"), show_alert=True)
 
@@ -146,7 +149,7 @@ async def return_to_history_list(callback: CallbackQuery, state: FSMContext, sup
             message_id=state_data['photo_message_id']
         )
     except:
-        pass     
+        pass
     try:
         await callback.bot.delete_message(
             chat_id=callback.message.chat.id,
@@ -154,8 +157,9 @@ async def return_to_history_list(callback: CallbackQuery, state: FSMContext, sup
         )
     except:
         pass
-        
+
         await handle_view_history(callback, state, supabase_client)
+
 
 @view_history.callback_query(F.data == "exit_history")
 async def handle_exit_history(callback: CallbackQuery, state: FSMContext):
