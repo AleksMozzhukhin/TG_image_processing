@@ -8,6 +8,7 @@ cupy-cuda12x
 aiogram
 python-dotenv
 supabase
+requests
 
 # Драйвер для PostgreSQL.
 psycopg[binary]

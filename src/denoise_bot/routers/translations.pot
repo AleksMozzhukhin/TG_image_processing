@@ -1,0 +1,85 @@
+# Translations template for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-06-27 04:04+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: src/denoise_bot/routers/generate_image_button.py:32
+msgid "Введите текст для генерации изображения:"
+msgstr ""
+
+#: src/denoise_bot/routers/generate_image_button.py:44
+msgid "Генерирую изображение...⏳"
+msgstr ""
+
+#: src/denoise_bot/routers/generate_image_button.py:83
+msgid "Ваше изображение готово!"
+msgstr ""
+
+#: src/denoise_bot/routers/generate_image_button.py:87
+#, python-brace-format
+msgid "Произошла ошибка при обработке: {error}"
+msgstr ""
+
+#: src/denoise_bot/routers/generate_image_button.py:90
+#: src/denoise_bot/routers/start.py:71 src/denoise_bot/routers/start.py:84
+msgid "Выберите действие:"
+msgstr ""
+
+#: src/denoise_bot/routers/magic_button.py:39
+msgid "Котики куда-то убежали... Попробуйте позже!"
+msgstr ""
+
+#: src/denoise_bot/routers/magic_button.py:51
+msgid "Вот ваша порция котиков! 😊"
+msgstr ""
+
+#: src/denoise_bot/routers/magic_button.py:57
+msgid "Произошла ошибка при загрузке котиков 😿"
+msgstr ""
+
+#: src/denoise_bot/routers/remove_noise_button.py:24
+msgid "Загрузите вышу картинку"
+msgstr ""
+
+#: src/denoise_bot/routers/remove_noise_button.py:36
+msgid "🔄 Ваше изображение обрабатывается..."
+msgstr ""
+
+#: src/denoise_bot/routers/remove_noise_button.py:41
+msgid "🔄 Обрабатываем изображение нейросетью..."
+msgstr ""
+
+#: src/denoise_bot/routers/remove_noise_button.py:50
+msgid "🔄 Подготавливаем результат..."
+msgstr ""
+
+#: src/denoise_bot/routers/remove_noise_button.py:52
+msgid "Модель вернула None"
+msgstr ""
+
+#: src/denoise_bot/routers/remove_noise_button.py:67
+msgid "Ошибка кодирования jpg"
+msgstr ""
+
+#: src/denoise_bot/routers/remove_noise_button.py:98
+msgid "✅ Результат обработки"
+msgstr ""
+
+#: src/denoise_bot/routers/start.py:67
+msgid "Выбран русский язык"
+msgstr ""
+
