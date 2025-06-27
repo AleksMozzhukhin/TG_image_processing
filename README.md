@@ -1,6 +1,7 @@
 # DenoiseBuddy: Телеграм-бот для обработки изображений
 
 [![Python Version](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+[![Documentation](https://github.com/AleksMozzhukhin/TG_image_processing/actions/workflows/docs.yml/badge.svg)](https://AleksMozzhukhin.github.io/TG_image_processing/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Tests: Pytest](https://img.shields.io/badge/tests-pytest-green.svg)](https://pytest.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
