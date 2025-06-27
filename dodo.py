@@ -56,8 +56,6 @@ def task_docs():
             # 1. Собрать документацию (оставляем как есть)
             f"sphinx-build -b html {DOCS_DIR / 'source'} {build_dir}",
 
-            # --- ИСПРАВЛЕННЫЙ ВЫЗОВ ---
-            # Теперь мы вызываем нашу обертку `copy_dir`
             (copy_dir, [build_dir, target_dir]),
         ],
         "file_dep": list((DOCS_DIR / "source").glob("**/*.rst")) + [DOCS_DIR / "source" / "conf.py"],
@@ -82,7 +80,6 @@ def task_build():
     """Собрать финальный wheel и sdist пакеты проекта."""
     return {
         "actions": ["python -m build"],
-        # Эта задача зависит от готовности документации и локализации
         "task_dep": ["docs", "i18n_compile"],
         "doc": "Собрать wheel и sdist пакеты проекта.",
     }
