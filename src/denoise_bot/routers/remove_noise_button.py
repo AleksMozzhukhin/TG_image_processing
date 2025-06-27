@@ -8,10 +8,10 @@ import io
 import uuid
 import numpy as np
 
-from ..keyboards_buttons import menu_buttons, ButtonText
+from src.denoise_bot.routers.keyboards_buttons import menu_buttons, ButtonText
 from .button_states import Form, DelNoise_States
 from tempfile import mkdtemp
-from ML_component import main_model
+from ..ML_component import main_model
 
 
 remove_noise = Router()
@@ -21,7 +21,7 @@ remove_noise = Router()
 async def handle_remove_noise(callback: CallbackQuery, state: FSMContext) -> None:
     """Удалить шум с изображения, начало обработки"""
     await callback.message.answer(
-        _("Загрузите вышу картинку"),
+        _("Загрузите вашу картинку"),
         reply_markup=None
     )
     await state.set_state(DelNoise_States.get_image)

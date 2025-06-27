@@ -8,7 +8,7 @@ import supabase as sb
 import httpx
 from aiogram.types import BufferedInputFile
 
-from ..keyboards_buttons import menu_buttons, ButtonText
+from src.denoise_bot.routers.keyboards_buttons import menu_buttons, ButtonText
 from .button_states import Form, History_state
 
 view_history = Router()
