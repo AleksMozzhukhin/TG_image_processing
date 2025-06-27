@@ -11,7 +11,7 @@ import supabase as sb
 import uuid
 
 from ..fusion_brain import FusionBrainAPI
-from ..keyboards_buttons import menu_buttons, ButtonText
+from src.denoise_bot.routers.keyboards_buttons import menu_buttons, ButtonText
 from .button_states import Form, GenImage_States
 
 
@@ -84,7 +84,7 @@ async def generate_image_from_text(message: Message, state: FSMContext, supabase
         )
 
     except Exception as e:
-        await message.answer(_("Произошла ошибка при обработке: {error}").format(error=str(e)))
+        await message.answer(_("Произошла ошибка при обработке: {}").format(error=str(e)))
 
     await message.answer(
         _("Выберите действие:"),
