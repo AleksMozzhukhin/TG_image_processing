@@ -1,0 +1,4 @@
+[pydocstyle]
+convention = google
+
+ignore = D100, D104, D107, D400
