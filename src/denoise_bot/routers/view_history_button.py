@@ -9,7 +9,7 @@ import httpx
 from aiogram.types import BufferedInputFile
 
 from .start import menu_buttons
-from .button_states import Form, History_state
+from .button_states import Form, History
 
 view_history = Router()
 
@@ -58,14 +58,14 @@ async def handle_view_history(callback: CallbackQuery, state: FSMContext, supaba
             _("Ваши предыдущие запросы:"),
             reply_markup=builder.as_markup()
         )
-        await state.set_state(History_state)
+        await state.set_state(History.view_hist)
         #await callback.answer()
         
     except Exception as e:
         await callback.message.answer(_("Ошибка при получении истории: {}").format(str(e)))
         await callback.answer()
 
-@view_history.callback_query(History_state, F.data.startswith("show_image:"))
+@view_history.callback_query(History.view_hist, F.data.startswith("show_image:"))
 async def handle_history_select(callback: CallbackQuery, state: FSMContext):
     """Показать выбранное изображение из истории"""
     try:
@@ -92,24 +92,6 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
         ),
             caption=_("🖼️ Запрос: {}").format(item['request'][:200])
         )
-        #builder = InlineKeyboardBuilder()
-        # for item_id, item_data in history_data.items():
-        #     timestamp = datetime.datetime.fromisoformat(item_data['created_at']).strftime("%d.%m %H:%M")
-        #     btn_text = f"{item_data['request'][:15]}... {timestamp}"[:64]
-        #     builder.add(InlineKeyboardButton(
-        #         text=btn_text,
-        #         callback_data=f"hist_item:{item_id}"
-        #     ))
-        
-        # builder.row(InlineKeyboardButton(
-        #     text="🔙 Назад",
-        #     callback_data="exit_history"
-        # ))
-        
-        # await callback.message.answer(
-        #     "📜 Ваша история запросов:",
-        #     reply_markup=builder.as_markup()
-        # )
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(
             text=_("↩️ Назад к списку"),
@@ -124,18 +106,18 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
             _("Вы можете вернуться к списку запросов:"),
             reply_markup=builder.as_markup()
         )
-        await state.set_state(History_again)
+        await state.set_state(History.view_again)
  
     except Exception as e:
         await callback.answer(_("❌ Ошибка загрузки"), show_alert=True)
         print(f"Error: {repr(e)}")
 
-@view_history.callback_query(History_again, F.data == "back_to_history")
+@view_history.callback_query(History.view_again, F.data == "back_to_history")
 async def return_to_history_list(callback: CallbackQuery, state: FSMContext, supabase_client: sb.Client):
     """Возврат к полному списку истории, вызывая исходную функцию"""
     try:
         await callback.answer()
-        await state.set_state(History_again)
+        await state.set_state(History.view_again)
 
         state_data = await state.get_data()
         user_id = callback.from_user.id
@@ -158,8 +140,22 @@ async def return_to_history_list(callback: CallbackQuery, state: FSMContext, sup
             
     except Exception as e:
         await callback.answer(_("❌ Не удалось загрузить историю"), show_alert=True)
-        print(f"Return to history error: {repr(e)}")
 
+        await callback.bot.delete_message(
+            chat_id=callback.message.chat.id,
+            message_id=state_data['photo_message_id']
+        )
+    except:
+        pass     
+    try:
+        await callback.bot.delete_message(
+            chat_id=callback.message.chat.id,
+            message_id=state_data['control_message_id']
+        )
+    except:
+        pass
+        
+        await handle_view_history(callback, state, supabase_client)
 
 @view_history.callback_query(F.data == "exit_history")
 async def handle_exit_history(callback: CallbackQuery, state: FSMContext):
