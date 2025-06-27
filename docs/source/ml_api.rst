@@ -1,0 +1,41 @@
+===============================
+Справка по API: ML Компонент
+===============================
+
+Этот раздел описывает внутренние модули, отвечающие за алгоритмы обработки изображений.
+
+Основной пайплайн
+--------------------
+Этот модуль является точкой входа для запуска процесса восстановления изображения.
+
+.. automodule:: denoise_bot.ML_component.main_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Ядро алгоритма ADMM
+-------------------------
+Здесь реализованы математические шаги алгоритма матричного дозаполнения.
+
+.. automodule:: denoise_bot.ML_component.admm_core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Вспомогательные утилиты
+--------------------------
+Функции для загрузки/сохранения, работы с бэкендами (CPU/GPU) и генерации масок.
+
+.. automodule:: denoise_bot.ML_component.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Функции для визуализации
+----------------------------
+Создание сравнительных графиков и графиков сходимости.
+
+.. automodule:: denoise_bot.ML_component.visualize
+   :members:
+   :undoc-members:
+   :show-inheritance:

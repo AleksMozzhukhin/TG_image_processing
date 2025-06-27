@@ -1,2 +1,13 @@
 .idea
 .venv
+.venv_linux
+.env
+*.env
+*/__pycache__/
+*.pyc
+__pycache__
+docs/build
+docs/source/_templates
+*/denoise_bot.egg-info
+*.mo
+.doit.db

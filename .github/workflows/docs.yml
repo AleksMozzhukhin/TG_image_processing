@@ -1,0 +1,45 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Клонируем репозиторий
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 3. Устанавливаем зависимости для документации
+      # Используем extras_require из pyproject.toml
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      # 4. Собираем документацию с помощью doit
+      # Используем doit, так как он уже настроен
+      - name: Build documentation
+        run: python -m doit docs
+
+      # 5. Деплоим собранную документацию на GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Указываем папку, где лежит собранный HTML
+          publish_dir: ./docs/build/html
+          # Указываем, что нужно коммитить от имени GitHub Actions
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
