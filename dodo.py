@@ -1,11 +1,13 @@
 import os
 from pathlib import Path
+import shutil
 
 # --- Конфигурация путей ---
 ROOT_DIR = Path(__file__).parent
 DOCS_DIR = ROOT_DIR / "docs"
 SRC_DIR = ROOT_DIR / "src"
-ROUTERS_DIR = SRC_DIR / "denoise_bot" / "routers"
+PKG_DIR = SRC_DIR / "denoise_bot"
+ROUTERS_DIR = PKG_DIR / "routers"
 
 # Пути и домен для локализации
 DOMAIN = "translations"
@@ -15,121 +17,87 @@ LOCALES_DIR = ROUTERS_DIR / "locales"
 LANGUAGES = ["en_US"]
 
 
-# --- Задачи ---
+# --- ОСНОВНЫЕ ЗАДАЧИ СБОРКИ ---
+def copy_dir(src, dst):
+    """Вспомогательная функция-обертка для shutil.copytree, чтобы doit был доволен."""
+    shutil.copytree(src, dst, dirs_exist_ok=True)
+    return True
+
+def task_cleanup():
+    """Очистка всех артефактов сборки (папок build, dist, .egg-info и т.д.)."""
+    def clean_func():
+        patterns_to_remove = [
+            "build", "dist",
+            str(SRC_DIR / "*.egg-info"),
+            str(PKG_DIR / "share")
+        ]
+        for pattern in patterns_to_remove:
+            for path in ROOT_DIR.glob(pattern):
+                if path.is_dir():
+                    shutil.rmtree(path, ignore_errors=True)
+                    print(f"Removed directory: {path}")
+                elif path.is_file():
+                    path.unlink()
+                    print(f"Removed file: {path}")
+
+    return {
+        "actions": [clean_func],
+        "doc": "Очистить все артефакты сборки."
+    }
+
 
 def task_docs():
-    """Сборка HTML-документации с помощью Sphinx."""
-    source_files = list(SRC_DIR.glob("**/*.py"))
-    doc_files = list((DOCS_DIR / "source").glob("**/*.rst"))
+    """Сборка HTML-документации и копирование ее внутрь пакета."""
+    build_dir = DOCS_DIR / "build" / "html"
+    target_dir = PKG_DIR / "share" / "doc" / "html"
 
     return {
         "actions": [
-            f"sphinx-build -M clean {DOCS_DIR / 'source'} {DOCS_DIR / 'build'}",
-            f"sphinx-build -b html {DOCS_DIR / 'source'} {DOCS_DIR / 'build/html'}"
+            # 1. Собрать документацию (оставляем как есть)
+            f"sphinx-build -b html {DOCS_DIR / 'source'} {build_dir}",
+
+            # --- ИСПРАВЛЕННЫЙ ВЫЗОВ ---
+            # Теперь мы вызываем нашу обертку `copy_dir`
+            (copy_dir, [build_dir, target_dir]),
         ],
-        "file_dep": source_files + doc_files + [DOCS_DIR / "source" / "conf.py"],
-        "targets": [DOCS_DIR / "build" / "html" / "index.html"],
-        "clean": [f"rm -rf {DOCS_DIR / 'build'}"],
-        "doc": "Собрать HTML документацию проекта.",
+        "file_dep": list((DOCS_DIR / "source").glob("**/*.rst")) + [DOCS_DIR / "source" / "conf.py"],
+        "targets": [target_dir / "index.html"],
+        "clean": [f"rm -rf {DOCS_DIR / 'build'}", f"rm -rf {PKG_DIR / 'share'}"],
+        "doc": "Собрать HTML-документацию и подготовить ее к упаковке.",
+    }
+
+
+def task_i18n_compile():
+    """[i18n] Скомпилировать .po файлы в бинарные .mo файлы."""
+    po_files = list(LOCALES_DIR.glob(f"**/{DOMAIN}.po"))
+    return {
+        "actions": [f"pybabel compile -D {DOMAIN} -d {LOCALES_DIR} -f"],
+        "file_dep": po_files,
+        "targets": [p.with_suffix(".mo") for p in po_files],
+        "doc": "Скомпилировать переводы в .mo файлы."
+    }
+
+
+def task_build():
+    """Собрать финальный wheel и sdist пакеты проекта."""
+    return {
+        "actions": ["python -m build"],
+        # Эта задача зависит от готовности документации и локализации
+        "task_dep": ["docs", "i18n_compile"],
+        "doc": "Собрать wheel и sdist пакеты проекта.",
     }
 
 
 def task_test():
     """Запуск тестов с помощью pytest."""
     return {
-        "actions": ["pytest"],
+        "actions": ["pytest -v"],
         "verbosity": 2,
         "doc": "Запустить все тесты проекта.",
     }
 
 
-# --- Задачи для локализации ---
-
-def task_i18n_extract():
-    """[i18n] 1. Извлечь переводимые строки из кода в .pot шаблон."""
-    source_files = list(SRC_DIR.glob("**/*.py"))
-
-    babel_cfg_content = """
-[python: **.py]
-[extractors]
-python = babel.messages.extract:extract_python
-    """
-
-    return {
-        "actions": [
-            # Создаем babel.cfg, если его нет
-            (create_babel_cfg, [babel_cfg_content]),
-            # Указываем использовать этот конфиг
-            f"pybabel extract -F babel.cfg . -o {POT_FILE}"
-        ],
-        "file_dep": source_files,
-        "targets": [POT_FILE],
-        "doc": "Создать/обновить .pot шаблон переводов.",
-        "clean": [f"rm -f {ROOT_DIR / 'babel.cfg'}"]  # Очистка конфига
-    }
-
-
-def create_babel_cfg(content, path="babel.cfg"):
-    """Вспомогательная функция для создания babel.cfg"""
-    p = Path(path)
-    if not p.exists():
-        p.write_text(content)
-
-
-def task_i18n_init():
-    """[i18n] 2. Инициализировать каталоги для НОВЫХ языков (запускать вручную)."""
-    for lang in LANGUAGES:
-        po_file = LOCALES_DIR / lang / "LC_MESSAGES" / f"{DOMAIN}.po"
-        # Создаем задачу, только если .po файл еще не существует
-        if not po_file.exists():
-            yield {
-                "name": lang,
-                "actions": [
-                    f"pybabel init -l {lang} -D {DOMAIN} -i {POT_FILE} -d {LOCALES_DIR}"
-                ],
-                "file_dep": [POT_FILE],
-                "targets": [po_file],
-                "doc": f"Инициализировать каталог для языка: {lang}",
-            }
-
-
-def task_i18n_update():
-    """[i18n] 3. Обновить существующие .po файлы из .pot шаблона."""
-    lang_dirs = [d for d in LOCALES_DIR.iterdir() if d.is_dir() and d.name in LANGUAGES]
-    po_files = [LOCALES_DIR / lang.name / "LC_MESSAGES" / f"{DOMAIN}.po" for lang in lang_dirs]
-
-    return {
-        "task_dep": ["i18n_extract"],
-        "actions": [
-            f"pybabel update -D {DOMAIN} -i {POT_FILE} -d {LOCALES_DIR}"
-        ],
-        "file_dep": [POT_FILE],
-    }
-
-
-def task_i18n_compile():
-    """[i18n] 4. Скомпилировать .po файлы в бинарные .mo файлы."""
-    po_files = list(LOCALES_DIR.glob(f"**/{DOMAIN}.po"))
-
-    return {
-        "task_dep": ["i18n_update"],
-        "actions": [
-            f"pybabel compile -D {DOMAIN} -d {LOCALES_DIR}"
-        ],
-        "file_dep": po_files,
-        "targets": [p.with_suffix(".mo") for p in po_files],
-    }
-
-
-def task_i18n():
-    """[i18n] Полный цикл: извлечь, обновить и скомпилировать переводы."""
-    return {
-        "actions": None,
-        "task_dep": ["i18n_compile"],
-    }
-
-
 # --- Настройка задач по умолчанию ---
 DOIT_CONFIG = {
-    'default_tasks': ['docs'],
+    'default_tasks': ['build'],
 }

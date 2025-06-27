@@ -1,6 +1,6 @@
-from aiogram import Router, html, F
+from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, BufferedInputFile
+from aiogram.types import Message, CallbackQuery, BufferedInputFile, PhotoSize
 import supabase as sb
 import cv2
 import datetime
@@ -8,11 +8,10 @@ import io
 import uuid
 import numpy as np
 
-from .keyboards_buttons import menu_buttons, ButtonText
+from src.denoise_bot.routers.keyboards_buttons import menu_buttons
 from .button_states import Form, DelNoise_States
 from tempfile import mkdtemp
 from ..ML_component import main_model
-
 
 remove_noise = Router()
 
@@ -21,31 +20,41 @@ remove_noise = Router()
 async def handle_remove_noise(callback: CallbackQuery, state: FSMContext) -> None:
     """Удалить шум с изображения, начало обработки"""
     await callback.message.answer(
-        _("Загрузите вашу картинку"),
+        _("Загрузите вашу картинку (как фото или как файл)"),
         reply_markup=None
     )
     await state.set_state(DelNoise_States.get_image)
 
 
-@remove_noise.message(DelNoise_States.get_image, F.photo)
+@remove_noise.message(
+    DelNoise_States.get_image,
+    (F.photo) | (F.document & F.document.mime_type.startswith("image/")),
+)
 async def process_received_image(
-    message: Message, state: FSMContext, supabase_client: sb.Client
+        message: Message, state: FSMContext, supabase_client: sb.Client
 ) -> None:
-    photo: PhotoSize = message.photo[-1]
+    if message.photo:
+        file_id = message.photo[-1].file_id
+    elif message.document:
+        file_id = message.document.file_id
+    else:
+        await message.answer("Пожалуйста, отправьте изображение как фото или файл.")
+        return
+
     user = message.from_user
     processing_msg = await message.answer(_("🔄 Ваше изображение обрабатывается..."))
     try:
-        image_bytes_io = await message.bot.download(photo.file_id)
+        image_bytes_io = await message.bot.download(file_id)
         image_bytes = image_bytes_io.read()
 
-        await processing_msg.edit_text(_("🔄 Обрабатываем изображение нейросетью..."))
+        await processing_msg.edit_text(_("🔄 Обрабатываем изображение моделью..."))
 
         temp_dir = mkdtemp(prefix="inpainting_")
         recovered_image_np = main_model.run_inpainting_pipeline(
             damaged_image_source=io.BytesIO(image_bytes),
             output_dir=temp_dir,
-            max_iters=5,
-            use_gpu=False,
+            max_iters=250,
+            use_gpu=True,
         )
         await processing_msg.edit_text(_("🔄 Подготавливаем результат..."))
         if recovered_image_np is None:
@@ -53,9 +62,9 @@ async def process_received_image(
 
         if recovered_image_np.dtype == np.float64:
             recovered_image_np = (
-                255
-                * (recovered_image_np - recovered_image_np.min())
-                / (recovered_image_np.max() - recovered_image_np.min())
+                    255
+                    * (recovered_image_np - recovered_image_np.min())
+                    / (recovered_image_np.max() - recovered_image_np.min())
             )
             recovered_image_np = recovered_image_np.astype(np.uint8)
 
@@ -74,11 +83,11 @@ async def process_received_image(
         storage_response = supabase_client.storage.from_("images").upload(
             path=file_path,
             file=processed_image_bytes,
-            file_options={"content-type": "image/*"}
+            file_options={"content-type": "image/jpeg"}  # Указываем корректный mime-type
         )
 
         image_url = supabase_client.storage.from_("images").get_public_url(file_path)
-        
+
         request_data = {
             "created_at": datetime.datetime.now().isoformat(),
             "user_id": user.id,
@@ -99,15 +108,14 @@ async def process_received_image(
         )
 
     except Exception as e:
+        await processing_msg.delete()  # Удаляем сообщение "обрабатывается" даже в случае ошибки
         await message.answer("Ошибка обработки: {}".format(str(e)))
         import traceback
-
         traceback.print_exc()
 
     finally:
         if "temp_dir" in locals():
             import shutil
-
             shutil.rmtree(temp_dir, ignore_errors=True)
 
     await message.answer(
