@@ -10,10 +10,13 @@ import gettext
 
 from ..keyboards_buttons import language_buttons, menu_buttons
 from .button_states import Form, DelNoise_States
- 
-user_langs = {} 
 
 start = Router()
+
+locales_path = os.path.join(os.path.dirname(__file__), 'locales')
+translation = gettext.translation("translations", localedir=locales_path, fallback=True)
+_, ngettext = translation.gettext, translation.ngettext
+user_langs = {}
 
 def set_locale(locale_name):
     """Set locale for particular user."""
@@ -21,7 +24,7 @@ def set_locale(locale_name):
 
     try:
         translation = gettext.translation(
-            "bot",
+            "translations",
             localedir=locales_path,
             languages=[locale_name],
             fallback=True
@@ -55,15 +58,13 @@ async def process_language_selection(callback: CallbackQuery, state: FSMContext,
     set_locale(language)
     
     await callback.message.edit_text(
-        text="Выбран русский язык" if language == "RU" else "English language selected",
+        text=_("Выбран русский язык"),
         reply_markup=None
     )
     await callback.message.answer(
-        "Выберите действие:",
+        _("Выберите действие:"),
         reply_markup=menu_buttons()
     )
-
-    print('await choose action finished\n')
 
     await state.set_state(Form.is_choosing)
     await callback.answer()
@@ -72,9 +73,6 @@ async def process_language_selection(callback: CallbackQuery, state: FSMContext,
 async def show_main_menu(message: Message):
     """Показ главного меню по текстовому сообщению от пользователя."""
     await message.answer(
-        "Выберите действие:",
+        _("Выберите действие:"),
         reply_markup=menu_buttons()
     )
-    
-    print('SHOW_MAIN_MENU\n')
-    return

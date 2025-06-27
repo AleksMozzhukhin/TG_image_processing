@@ -27,10 +27,9 @@ FUSIONBRAIN_URL = "https://api-key.fusionbrain.ai/key/api/v1/pipeline/run'"
 @generate_image.callback_query(Form.is_choosing, F.data.startswith("generate_image"))
 async def handle_generate_image(callback: CallbackQuery, state: FSMContext) -> None:
     """Обработка нажатия кнопки генерации изображения"""
-    print('ENTERED HGENIMAGE\n')
 
     await callback.message.answer(
-        "Введите текст для генерации изображения:",
+        _("Введите текст для генерации изображения:"),
         reply_markup=ReplyKeyboardRemove()
     )
     await state.set_state(GenImage_States.waiting_for_prompt)
@@ -38,19 +37,11 @@ async def handle_generate_image(callback: CallbackQuery, state: FSMContext) -> N
 @generate_image.message(GenImage_States.waiting_for_prompt)
 async def generate_image_from_text(message: Message, state: FSMContext, supabase_client: sb.Client) -> None:
     """Генерация изображения по тексту через API"""
-    print('entered generate image from text\n')
 
     prompt = message.text
     user = message.from_user
 
-    print('sent message:', prompt)
-
-    current_datetime = datetime.now()
-    #datetime_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-    await message.answer("Генерирую изображение...⏳")
-
-    print('after genering picture\nentering try except\n')
+    await message.answer(_("Генерирую изображение...⏳"))
 
     try:
         api = FusionBrainAPI('https://api-key.fusionbrain.ai/', FUSIONBRAIN_API_KEY, FUSIONBRAIN_API_SECRET)
@@ -59,20 +50,11 @@ async def generate_image_from_text(message: Message, state: FSMContext, supabase
         generated_uuid = api.generate(prompt, pipeline_id)
         files = api.check_generation(generated_uuid)
 
-        print('after files\n')
-        print(files)
-
         image_base64 = files[0]
-
-        print('after image base\n')
         image_data = base64.b64decode(image_base64)
-
-        print('after image\n')
 
         file_name = f"generated_{user.id}_{uuid.uuid4().hex}.png"
         file_path = f"users/{user.id}/{file_name}"
-
-        print('uploading image\n')
 
         # Загружаем изображение в Supabase
         storage_response = supabase_client.storage.from_("images").upload(
@@ -98,14 +80,14 @@ async def generate_image_from_text(message: Message, state: FSMContext, supabase
 
         await message.answer_photo(
             photo=photo_file,
-            caption="Ваше изображение готово!"
+            caption=_("Ваше изображение готово!")
         )
 
     except Exception as e:
         await message.answer(_("Произошла ошибка при обработке: {error}").format(error=str(e)))
 
     await message.answer(
-        "Выберите действие:",
+        _("Выберите действие:"),
         reply_markup=menu_buttons()
     )
     await state.set_state(Form.buttons)
