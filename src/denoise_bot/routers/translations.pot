@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-06-27 10:35+0300\n"
+"POT-Creation-Date: 2025-06-27 05:29+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,7 +35,8 @@ msgid "Произошла ошибка при обработке: {}"
 msgstr ""
 
 #: src/denoise_bot/routers/generate_image_button.py:90
-#: src/denoise_bot/routers/start.py:71 src/denoise_bot/routers/start.py:84
+#: src/denoise_bot/routers/start.py:115 src/denoise_bot/routers/start.py:128
+#: src/denoise_bot/routers/view_history_button.py:130
 msgid "Выберите действие:"
 msgstr ""
 
@@ -79,7 +80,57 @@ msgstr ""
 msgid "✅ Результат обработки"
 msgstr ""
 
+#: src/denoise_bot/routers/start.py:64
+msgid "Удалить шум с изображения"
+msgstr ""
+
 #: src/denoise_bot/routers/start.py:67
+msgid "Сгенерировать изображение"
+msgstr ""
+
+#: src/denoise_bot/routers/start.py:70
+msgid "Посмотреть историю"
+msgstr ""
+
+#: src/denoise_bot/routers/start.py:73
+msgid "Магия"
+msgstr ""
+
+#: src/denoise_bot/routers/start.py:111
 msgid "Выбран русский язык"
+msgstr ""
+
+#: src/denoise_bot/routers/view_history_button.py:33
+msgid "У вас еще нет истории запросов."
+msgstr ""
+
+#: src/denoise_bot/routers/view_history_button.py:53
+msgid "🚪 Выйти из истории"
+msgstr ""
+
+#: src/denoise_bot/routers/view_history_button.py:59
+msgid "Ваши предыдущие запросы:"
+msgstr ""
+
+#: src/denoise_bot/routers/view_history_button.py:66
+#, python-brace-format
+msgid "Ошибка при получении истории: {}"
+msgstr ""
+
+#: src/denoise_bot/routers/view_history_button.py:82
+msgid "❌ Изображение не найдено"
+msgstr ""
+
+#: src/denoise_bot/routers/view_history_button.py:95
+#, python-brace-format
+msgid "🖼️ Запрос: {}"
+msgstr ""
+
+#: src/denoise_bot/routers/view_history_button.py:117
+msgid "❌ Ошибка загрузки"
+msgstr ""
+
+#: src/denoise_bot/routers/view_history_button.py:126
+msgid "Вы вернулись в главное меню:"
 msgstr ""
 

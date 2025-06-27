@@ -10,6 +10,14 @@ from aiogram.types import CallbackQuery, Message
 from .button_states import Form
 from .keyboards_buttons import language_buttons, menu_buttons
 
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+)
+from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
+
 start = Router()
 
 locales_path = os.path.join(os.path.dirname(__file__), "locales")
@@ -37,6 +45,43 @@ def set_locale(locale_name):
         translation.install()
         _ = translation.gettext
         ngettext = translation.ngettext
+
+class ButtonText:
+    """Текст кнопочек в телеграмме"""
+
+    SET_EN = "English"
+    SET_RU = "Русский"
+
+
+def menu_buttons() -> InlineKeyboardMarkup:
+    """Inline-клавиатура для основного меню"""
+    builder = InlineKeyboardBuilder()
+
+    # Добавляем кнопки с callback_data
+    builder.row(
+        InlineKeyboardButton(text=_("Удалить шум с изображения"), callback_data="remove_noise")
+    )
+    builder.row(
+        InlineKeyboardButton(text=_("Сгенерировать изображение"), callback_data="generate_image")
+    )
+    builder.row(
+        InlineKeyboardButton(text=_("Посмотреть историю"), callback_data="view_history")
+    )
+    builder.row(
+        InlineKeyboardButton(text=_("Магия"), callback_data="magic_action")
+    )
+    return builder.as_markup()
+
+
+def language_buttons() -> InlineKeyboardMarkup:
+    """Показ кнопок выбора языка (инлайн клавиатура)"""
+    builder = InlineKeyboardBuilder()
+
+    builder.button(text=ButtonText.SET_RU, callback_data="lang_ru_RU")
+    builder.button(text=ButtonText.SET_EN, callback_data="lang_en_EN")
+
+    builder.adjust(2)
+    return builder.as_markup()
 
 
 @start.message(CommandStart())

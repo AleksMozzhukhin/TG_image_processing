@@ -1,6 +1,10 @@
 import datetime
 import io
 import uuid
+import numpy as np
+
+from .start import menu_buttons
+from .button_states import Form, DelNoise_States
 from tempfile import mkdtemp
 
 import cv2
@@ -10,10 +14,8 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
-from denoise_bot.routers.keyboards_buttons import menu_buttons
-
 from ..ML_component import main_model
-from .button_states import DelNoise_States, Form
+
 
 remove_noise = Router()
 
@@ -97,7 +99,7 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
             "created_at": datetime.datetime.now().isoformat(),
             "user_id": user.id,
             "request": "remove noise",
-            "image_url": image_url,
+            "image_url": image_url
         }
 
         db_response = supabase_client.table("images").insert(request_data).execute()

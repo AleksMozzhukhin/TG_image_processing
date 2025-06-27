@@ -9,6 +9,7 @@ from aiogram.types import BufferedInputFile, CallbackQuery, Message, ReplyKeyboa
 from dotenv import load_dotenv
 
 from ..fusion_brain import FusionBrainAPI
+from .start import menu_buttons
 from .button_states import Form, GenImage_States
 from .keyboards_buttons import menu_buttons
 
@@ -60,7 +61,7 @@ async def generate_image_from_text(message: Message, state: FSMContext, supabase
             "created_at": datetime.now().isoformat(),
             "user_id": user.id,
             "request": prompt,
-            "image_url": image_url,
+            "image_url": image_url
         }
 
         db_response = supabase_client.table("images").insert(request_data).execute()
