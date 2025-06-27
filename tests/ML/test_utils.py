@@ -1,11 +1,8 @@
-# tests/ML_component/test_utils.py
 
 import io
 import pytest
 import numpy as np
 from pathlib import Path
-from unittest.mock import MagicMock, patch
-
 from denoise_bot.ML_component import utils
 
 try:
@@ -109,7 +106,7 @@ def test_as_backend_array_to_cupy(sample_numpy_array):
     assert (result.get() == sample_numpy_array).all()
 
 
-# --- Тесты для работы с изображениями (обновленные) ---
+# --- Тесты для работы с изображениями ---
 
 def test_load_image_from_real_path_normalized(sample_image_path: Path):
     """Проверяет загрузку реального изображения из файла и его нормализацию."""
@@ -162,7 +159,6 @@ def test_load_image_raises_error_for_nonexistent_path():
 def test_save_and_reload_image_cycle(tmp_path: Path):
     """
     Проверяет полный цикл: сохранение массива в файл и его последующую загрузку.
-    Это лучший способ проверить функцию сохранения, чем мокать os и cv2.
     """
     # Arrange
     # Создаем случайный тестовый массив, представляющий изображение
@@ -183,9 +179,6 @@ def test_save_and_reload_image_cycle(tmp_path: Path):
     # Проверяем, что размерности совпадают
     assert reloaded_image_array.shape == original_image_array.shape
 
-    # Сравниваем массивы. Из-за сжатия и преобразования типов они не будут
-    # абсолютно идентичны. Поэтому проверяем, что они "достаточно близки".
-    # Средняя абсолютная ошибка - хороший показатель для этого.
     mean_absolute_error = np.mean(np.abs(original_image_array - reloaded_image_array))
     assert mean_absolute_error < 0.01, (
         f"Разница между сохраненным и загруженным изображением слишком велика: "
