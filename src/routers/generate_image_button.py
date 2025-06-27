@@ -90,4 +90,4 @@ async def generate_image_from_text(message: Message, state: FSMContext, supabase
         _("Выберите действие:"),
         reply_markup=menu_buttons()
     )
-    await state.set_state(Form.buttons)
+    await state.set_state(Form.is_choosing)

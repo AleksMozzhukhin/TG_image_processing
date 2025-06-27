@@ -72,6 +72,7 @@ async def process_language_selection(callback: CallbackQuery, state: FSMContext,
 @start.message(Form.buttons)
 async def show_main_menu(message: Message):
     """Показ главного меню по текстовому сообщению от пользователя."""
+    print("_SHOW MAIN MENU_")
     await message.answer(
         _("Выберите действие:"),
         reply_markup=menu_buttons()

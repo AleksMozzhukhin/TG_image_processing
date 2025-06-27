@@ -101,5 +101,9 @@ async def process_received_image(message: Message, state: FSMContext, supabase_c
         if 'temp_dir' in locals():
             import shutil
             shutil.rmtree(temp_dir, ignore_errors=True)
-    
-    await state.set_state(Form.buttons)
+            
+    await message.answer(
+        "Выберите действие:",
+        reply_markup=menu_buttons()
+    )
+    await state.set_state(Form.is_choosing)
