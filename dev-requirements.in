@@ -21,3 +21,6 @@ pytest-mock
 Sphinx
 sphinx-autobuild
 sphinx-autodoc-typehints
+
+# Инструменты для локализации
+babel
