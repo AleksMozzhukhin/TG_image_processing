@@ -284,9 +284,7 @@
         <span class="k">return</span> <span class="n">cp</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">use_gpu</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">CUPY_AVAILABLE</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;Предупреждение: Запрошен GPU, но CuPy не найден. Используется CPU (NumPy).&quot;</span>
-            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Предупреждение: Запрошен GPU, но CuPy не найден. Используется CPU (NumPy).&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CPU (NumPy) выбран в качестве бэкенда.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span></div>
 
@@ -367,9 +365,7 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">image</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Не удалось загрузить изображение по пути: </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Не удалось загрузить изображение по пути: </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Если это байтовый поток, читаем его в NumPy массив</span>
         <span class="n">file_bytes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
@@ -390,9 +386,7 @@
 
 <div class="viewcode-block" id="generate_mask">
 <a class="viewcode-back" href="../../../ml_api.html#denoise_bot.ML_component.utils.generate_mask">[документация]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_mask</span><span class="p">(</span>
-    <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">known_pixel_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_mask</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">known_pixel_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Генерирует бинарную NumPy маску, где True означает известный пиксель.</span>
 

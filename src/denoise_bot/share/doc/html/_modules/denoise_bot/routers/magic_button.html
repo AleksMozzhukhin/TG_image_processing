@@ -239,13 +239,13 @@
           <h1>Исходный код denoise_bot.routers.magic_button</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSInputFile</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">F</span><span class="p">,</span> <span class="n">Router</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">CallbackQuery</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">ButtonText</span><span class="p">,</span> <span class="n">menu_buttons</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">F</span><span class="p">,</span> <span class="n">Router</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">FSInputFile</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.button_states</span><span class="w"> </span><span class="kn">import</span> <span class="n">Form</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">menu_buttons</span>
 
 <span class="n">magic</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
 
@@ -265,16 +265,16 @@
     <span class="s2">&quot;Мурчание передается через фото!&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
+
 <div class="viewcode-block" id="handle_magic_button">
 <a class="viewcode-back" href="../../../bot_api.html#denoise_bot.routers.magic_button.handle_magic_button">[документация]</a>
 <span class="nd">@magic</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;magic_action&quot;</span><span class="p">))</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_magic_button</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Обработчик нажатия на кнопку - отправляет котиков сразу&quot;&quot;&quot;</span>
     <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">answer</span><span class="p">()</span>
-    
+
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">cat_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">CATS_IMAGES_DIR</span><span class="p">)</span> 
-                     <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;.png&#39;</span><span class="p">))]</span>
+        <span class="n">cat_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">CATS_IMAGES_DIR</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;.png&quot;</span><span class="p">))]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cat_images</span><span class="p">:</span>
             <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Котики куда-то убежали... Попробуйте позже!&quot;</span><span class="p">))</span>
@@ -288,9 +288,8 @@
             <span class="n">caption</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">CUTE_CAPTIONS</span><span class="p">)</span>
             <span class="n">photo</span> <span class="o">=</span> <span class="n">FSInputFile</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
             <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer_photo</span><span class="p">(</span><span class="n">photo</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="n">caption</span><span class="p">)</span>
-        
-        <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Вот ваша порция котиков! 😊&quot;</span><span class="p">),</span>
-                             <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">())</span>
+
+        <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Вот ваша порция котиков! 😊&quot;</span><span class="p">),</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">())</span>
 
         <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">)</span>
 

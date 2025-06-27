@@ -247,9 +247,7 @@
 
 <div class="viewcode-block" id="create_mask_from_damaged">
 <a class="viewcode-back" href="../../../ml_api.html#denoise_bot.ML_component.main_model.create_mask_from_damaged">[документация]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_mask_from_damaged</span><span class="p">(</span>
-    <span class="n">damaged_image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_mask_from_damaged</span><span class="p">(</span><span class="n">damaged_image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Отвечает за создание маски для матрицы.</span>
 
@@ -345,9 +343,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Создание маски на основе поврежденного изображения...&quot;</span><span class="p">)</span>
         <span class="n">mask_np</span> <span class="o">=</span> <span class="n">create_mask_from_damaged</span><span class="p">(</span><span class="n">damaged_image_np</span><span class="p">)</span>
 
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Передача данных на выбранный бэкенд (</span><span class="si">{</span><span class="s1">&#39;GPU&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">np</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;CPU&#39;</span><span class="si">}</span><span class="s2">)...&quot;</span>
-        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Передача данных на выбранный бэкенд (</span><span class="si">{</span><span class="s1">&#39;GPU&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">np</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;CPU&#39;</span><span class="si">}</span><span class="s2">)...&quot;</span><span class="p">)</span>
         <span class="n">image_to_recover</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">as_backend_array</span><span class="p">(</span><span class="n">damaged_image_np</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">as_backend_array</span><span class="p">(</span><span class="n">mask_np</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
 

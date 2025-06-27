@@ -21,5 +21,7 @@ class GenImage_States(StatesGroup):
 
     waiting_for_prompt = State()
 
-
-History_state = State()
+class History(StatesGroup):
+    """Состояния кнопки для просмотра истории"""
+    view_hist = State()
+    view_again = State()

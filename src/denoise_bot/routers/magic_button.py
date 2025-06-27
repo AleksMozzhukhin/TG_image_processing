@@ -5,8 +5,8 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
 
+from .start import menu_buttons
 from .button_states import Form
-from .keyboards_buttons import menu_buttons
 
 magic = Router()
 

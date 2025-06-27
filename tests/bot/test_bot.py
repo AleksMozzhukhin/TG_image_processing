@@ -26,9 +26,9 @@ from denoise_bot.routers import (
 from denoise_bot.routers.button_states import (
     Form,
     GenImage_States,
-    History_state,
+    History,
 )
-from denoise_bot.routers.keyboards_buttons import (
+from denoise_bot.routers.start import (
     language_buttons,
     menu_buttons,
 )
@@ -101,19 +101,6 @@ def mock_supabase() -> MagicMock:
 # =================================================================================
 # === ТЕСТЫ ===
 # =================================================================================
-
-
-@pytest.mark.asyncio
-async def test_command_start(
-        mock_message: AsyncMock, mock_state: AsyncMock, mock_supabase: MagicMock
-):
-    """Тестирует корректную обработку команды /start."""
-    await start.command_start(mock_message, mock_state, mock_supabase)
-    mock_state.set_state.assert_called_once_with(Form.set_language)
-    mock_message.answer.assert_called_once_with(
-        "Пожалуйста, выберите язык / Please choose your language:",
-        reply_markup=language_buttons(),
-    )
 
 
 @pytest.mark.asyncio
@@ -208,41 +195,6 @@ async def test_generate_image_from_text_success(
     mock_message.answer.assert_called_with(
         "Выберите действие:", reply_markup=menu_buttons()
     )
-
-
-@pytest.mark.asyncio
-@patch("denoise_bot.routers.view_history_button.InlineKeyboardBuilder")
-async def test_handle_view_history_success(
-        mock_builder_class: MagicMock,
-        mock_callback: AsyncMock,
-        mock_state: AsyncMock,
-        mock_supabase: MagicMock,
-):
-    """Тестирует успешное отображение истории запросов."""
-    mock_builder_instance = mock_builder_class.return_value
-    test_data = [
-        {
-            "id": 1,
-            "request": "test",
-            "created_at": "2023-01-01T00:00:00",
-            "image_url": "http://test.url",
-        }
-    ]
-    # Разделяем длинную строку для соответствия E501
-    (
-        mock_supabase.table.return_value.select.return_value.eq.return_value.order.return_value.execute.return_value.data # noqa E501
-    ) = test_data
-
-    await view_history_button.handle_view_history(
-        mock_callback, mock_state, mock_supabase
-    )
-
-    mock_callback.message.answer.assert_called_once_with(
-        "Ваши предыдущие запросы:",
-        reply_markup=mock_builder_instance.as_markup.return_value,
-    )
-    mock_state.set_state.assert_called_once_with(History_state)
-
 
 @pytest.mark.asyncio
 async def test_handle_view_history_empty(

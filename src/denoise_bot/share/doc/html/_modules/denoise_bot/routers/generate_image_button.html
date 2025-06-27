@@ -237,22 +237,19 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Исходный код denoise_bot.routers.generate_image_button</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Router</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">F</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">ReplyKeyboardRemove</span><span class="p">,</span> <span class="n">BufferedInputFile</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">supabase</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">supabase</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">F</span><span class="p">,</span> <span class="n">Router</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferedInputFile</span><span class="p">,</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">Message</span><span class="p">,</span> <span class="n">ReplyKeyboardRemove</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..fusion_brain</span><span class="w"> </span><span class="kn">import</span> <span class="n">FusionBrainAPI</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">menu_buttons</span><span class="p">,</span> <span class="n">ButtonText</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.button_states</span><span class="w"> </span><span class="kn">import</span> <span class="n">Form</span><span class="p">,</span> <span class="n">GenImage_States</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">menu_buttons</span>
 
 <span class="n">load_dotenv</span><span class="p">()</span>
 
@@ -263,32 +260,29 @@
 <span class="n">FUSIONBRAIN_API_SECRET</span> <span class="o">=</span> <span class="s2">&quot;1E0A23558FF802583C814E5AD49C4814&quot;</span>
 <span class="n">FUSIONBRAIN_URL</span> <span class="o">=</span> <span class="s2">&quot;https://api-key.fusionbrain.ai/key/api/v1/pipeline/run&#39;&quot;</span>
 
+
 <div class="viewcode-block" id="handle_generate_image">
 <a class="viewcode-back" href="../../../bot_api.html#denoise_bot.routers.generate_image_button.handle_generate_image">[документация]</a>
 <span class="nd">@generate_image</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;generate_image&quot;</span><span class="p">))</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_generate_image</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Обработка нажатия кнопки генерации изображения&quot;&quot;&quot;</span>
-
-    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
-        <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Введите текст для генерации изображения:&quot;</span><span class="p">),</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="n">ReplyKeyboardRemove</span><span class="p">()</span>
-    <span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Обработка нажатия кнопки генерации изображения.&quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Введите текст для генерации изображения:&quot;</span><span class="p">),</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">ReplyKeyboardRemove</span><span class="p">())</span>
     <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">GenImage_States</span><span class="o">.</span><span class="n">waiting_for_prompt</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="generate_image_from_text">
 <a class="viewcode-back" href="../../../bot_api.html#denoise_bot.routers.generate_image_button.generate_image_from_text">[документация]</a>
 <span class="nd">@generate_image</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">GenImage_States</span><span class="o">.</span><span class="n">waiting_for_prompt</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate_image_from_text</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">,</span> <span class="n">supabase_client</span><span class="p">:</span> <span class="n">sb</span><span class="o">.</span><span class="n">Client</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Генерация изображения по тексту через API&quot;&quot;&quot;</span>
-
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Генерация изображения по тексту через API.&quot;&quot;&quot;</span>
     <span class="n">prompt</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">from_user</span>
 
     <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Генерирую изображение...⏳&quot;</span><span class="p">))</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">api</span> <span class="o">=</span> <span class="n">FusionBrainAPI</span><span class="p">(</span><span class="s1">&#39;https://api-key.fusionbrain.ai/&#39;</span><span class="p">,</span> <span class="n">FUSIONBRAIN_API_KEY</span><span class="p">,</span> <span class="n">FUSIONBRAIN_API_SECRET</span><span class="p">)</span>
+        <span class="n">api</span> <span class="o">=</span> <span class="n">FusionBrainAPI</span><span class="p">(</span><span class="s2">&quot;https://api-key.fusionbrain.ai/&quot;</span><span class="p">,</span> <span class="n">FUSIONBRAIN_API_KEY</span><span class="p">,</span> <span class="n">FUSIONBRAIN_API_SECRET</span><span class="p">)</span>
         <span class="n">pipeline_id</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_pipeline</span><span class="p">()</span>
 
         <span class="n">generated_uuid</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">pipeline_id</span><span class="p">)</span>
@@ -302,9 +296,7 @@
 
         <span class="c1"># Загружаем изображение в Supabase</span>
         <span class="n">storage_response</span> <span class="o">=</span> <span class="n">supabase_client</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">from_</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span>
-            <span class="n">file_path</span><span class="p">,</span>
-            <span class="n">image_data</span><span class="p">,</span>
-            <span class="n">file_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;image/png&quot;</span><span class="p">}</span>
+            <span class="n">file_path</span><span class="p">,</span> <span class="n">image_data</span><span class="p">,</span> <span class="n">file_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;image/png&quot;</span><span class="p">}</span>
         <span class="p">)</span>
 
         <span class="n">image_url</span> <span class="o">=</span> <span class="n">supabase_client</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">from_</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_public_url</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
@@ -312,28 +304,19 @@
             <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
             <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">,</span>
-            <span class="s2">&quot;image_url&quot;</span><span class="p">:</span> <span class="n">image_url</span>
+            <span class="s2">&quot;image_url&quot;</span><span class="p">:</span> <span class="n">image_url</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="n">db_response</span> <span class="o">=</span> <span class="n">supabase_client</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 
-        <span class="n">photo_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span>
-            <span class="n">file</span><span class="o">=</span><span class="n">image_data</span><span class="p">,</span>
-            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;result.jpg&quot;</span>
-        <span class="p">)</span>
+        <span class="n">photo_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">image_data</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;result.jpg&quot;</span><span class="p">)</span>
 
-        <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer_photo</span><span class="p">(</span>
-            <span class="n">photo</span><span class="o">=</span><span class="n">photo_file</span><span class="p">,</span>
-            <span class="n">caption</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Ваше изображение готово!&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer_photo</span><span class="p">(</span><span class="n">photo</span><span class="o">=</span><span class="n">photo_file</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Ваше изображение готово!&quot;</span><span class="p">))</span>
 
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Произошла ошибка при обработке: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 
-    <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
-        <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Выберите действие:&quot;</span><span class="p">),</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">()</span>
-    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Выберите действие:&quot;</span><span class="p">),</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">())</span>
     <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">)</span></div>
 
 </pre></div>

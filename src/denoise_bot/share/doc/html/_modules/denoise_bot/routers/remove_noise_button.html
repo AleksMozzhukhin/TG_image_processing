@@ -237,21 +237,22 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Исходный код denoise_bot.routers.remove_noise_button</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Router</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">F</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">BufferedInputFile</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">supabase</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">menu_buttons</span><span class="p">,</span> <span class="n">ButtonText</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.button_states</span><span class="w"> </span><span class="kn">import</span> <span class="n">Form</span><span class="p">,</span> <span class="n">DelNoise_States</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">mkdtemp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..ML_component</span><span class="w"> </span><span class="kn">import</span> <span class="n">main_model</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">supabase</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">F</span><span class="p">,</span> <span class="n">Router</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferedInputFile</span><span class="p">,</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">Message</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">denoise_bot.routers.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">menu_buttons</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..ML_component</span><span class="w"> </span><span class="kn">import</span> <span class="n">main_model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.button_states</span><span class="w"> </span><span class="kn">import</span> <span class="n">DelNoise_States</span><span class="p">,</span> <span class="n">Form</span>
 
 <span class="n">remove_noise</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
 
@@ -260,51 +261,66 @@
 <a class="viewcode-back" href="../../../bot_api.html#denoise_bot.routers.remove_noise_button.handle_remove_noise">[документация]</a>
 <span class="nd">@remove_noise</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;remove_noise&quot;</span><span class="p">))</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_remove_noise</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Удалить шум с изображения, начало обработки&quot;&quot;&quot;</span>
-    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
-        <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Загрузите вашу картинку&quot;</span><span class="p">),</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Удалить шум с изображения, начало обработки.&quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Загрузите вашу картинку (как фото или как файл)&quot;</span><span class="p">),</span> <span class="n">reply_markup</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">DelNoise_States</span><span class="o">.</span><span class="n">get_image</span><span class="p">)</span></div>
 
 
 
-<span class="nd">@remove_noise</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">DelNoise_States</span><span class="o">.</span><span class="n">get_image</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">photo</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_received_image</span><span class="p">(</span>
-    <span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">,</span> <span class="n">supabase_client</span><span class="p">:</span> <span class="n">sb</span><span class="o">.</span><span class="n">Client</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">photo</span><span class="p">:</span> <span class="n">PhotoSize</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<div class="viewcode-block" id="process_received_image">
+<a class="viewcode-back" href="../../../bot_api.html#denoise_bot.routers.remove_noise_button.process_received_image">[документация]</a>
+<span class="nd">@remove_noise</span><span class="o">.</span><span class="n">message</span><span class="p">(</span>
+    <span class="n">DelNoise_States</span><span class="o">.</span><span class="n">get_image</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">photo</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">document</span> <span class="o">&amp;</span> <span class="n">F</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">mime_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;image/&quot;</span><span class="p">)),</span>
+<span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_received_image</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">,</span> <span class="n">supabase_client</span><span class="p">:</span> <span class="n">sb</span><span class="o">.</span><span class="n">Client</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Обрабатывает полученное изображение (фото или файл).</span>
+
+<span class="sd">    Скачивает изображение, запускает ML-пайплайн для восстановления,</span>
+<span class="sd">    сохраняет результат в Supabase и отправляет его пользователю.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">:</span>
+        <span class="n">file_id</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">file_id</span>
+    <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">document</span><span class="p">:</span>
+        <span class="n">file_id</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">file_id</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="s2">&quot;Пожалуйста, отправьте изображение как фото или файл.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
     <span class="n">user</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">from_user</span>
     <span class="n">processing_msg</span> <span class="o">=</span> <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;🔄 Ваше изображение обрабатывается...&quot;</span><span class="p">))</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">image_bytes_io</span> <span class="o">=</span> <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">bot</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">photo</span><span class="o">.</span><span class="n">file_id</span><span class="p">)</span>
+        <span class="n">image_bytes_io</span> <span class="o">=</span> <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">bot</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">file_id</span><span class="p">)</span>
         <span class="n">image_bytes</span> <span class="o">=</span> <span class="n">image_bytes_io</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
-        <span class="k">await</span> <span class="n">processing_msg</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;🔄 Обрабатываем изображение нейросетью...&quot;</span><span class="p">))</span>
+        <span class="k">await</span> <span class="n">processing_msg</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;🔄 Обрабатываем изображение моделью...&quot;</span><span class="p">))</span>
 
         <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;inpainting_&quot;</span><span class="p">)</span>
         <span class="n">recovered_image_np</span> <span class="o">=</span> <span class="n">main_model</span><span class="o">.</span><span class="n">run_inpainting_pipeline</span><span class="p">(</span>
             <span class="n">damaged_image_source</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">image_bytes</span><span class="p">),</span>
             <span class="n">output_dir</span><span class="o">=</span><span class="n">temp_dir</span><span class="p">,</span>
-            <span class="n">max_iters</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-            <span class="n">use_gpu</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">max_iters</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span>
+            <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">await</span> <span class="n">processing_msg</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;🔄 Подготавливаем результат...&quot;</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">recovered_image_np</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Модель вернула None&quot;</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">recovered_image_np</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
-            <span class="n">recovered_image_np</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="mi">255</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">recovered_image_np</span> <span class="o">-</span> <span class="n">recovered_image_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-                <span class="o">/</span> <span class="p">(</span><span class="n">recovered_image_np</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">recovered_image_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-            <span class="p">)</span>
-            <span class="n">recovered_image_np</span> <span class="o">=</span> <span class="n">recovered_image_np</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+            <span class="n">min_val</span> <span class="o">=</span> <span class="n">recovered_image_np</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">max_val</span> <span class="o">=</span> <span class="n">recovered_image_np</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">max_val</span> <span class="o">-</span> <span class="n">min_val</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">normalized_image</span> <span class="o">=</span> <span class="p">(</span><span class="n">recovered_image_np</span> <span class="o">-</span> <span class="n">min_val</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_val</span> <span class="o">-</span> <span class="n">min_val</span><span class="p">)</span>
+                <span class="n">recovered_image_np</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="n">normalized_image</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">recovered_image_np</span> <span class="o">=</span> <span class="n">recovered_image_np</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">recovered_image_np</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">recovered_image_np</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">recovered_image_np</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">recovered_image_np</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">)</span>
 
-        <span class="n">success</span><span class="p">,</span> <span class="n">encoded_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imencode</span><span class="p">(</span><span class="s1">&#39;.jpg&#39;</span><span class="p">,</span> <span class="n">recovered_image_np</span><span class="p">)</span>
+        <span class="n">success</span><span class="p">,</span> <span class="n">encoded_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imencode</span><span class="p">(</span><span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="n">recovered_image_np</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Ошибка кодирования jpg&quot;</span><span class="p">))</span>
 
@@ -316,31 +332,26 @@
         <span class="n">storage_response</span> <span class="o">=</span> <span class="n">supabase_client</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">from_</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span>
             <span class="n">path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
             <span class="n">file</span><span class="o">=</span><span class="n">processed_image_bytes</span><span class="p">,</span>
-            <span class="n">file_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;image/*&quot;</span><span class="p">}</span>
+            <span class="n">file_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;image/jpeg&quot;</span><span class="p">},</span>  <span class="c1"># Указываем корректный mime-type</span>
         <span class="p">)</span>
 
         <span class="n">image_url</span> <span class="o">=</span> <span class="n">supabase_client</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">from_</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_public_url</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-        
+
         <span class="n">request_data</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
             <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;remove noise&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;image_url&quot;</span><span class="p">:</span> <span class="n">image_url</span>
+            <span class="s2">&quot;image_url&quot;</span><span class="p">:</span> <span class="n">image_url</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="n">db_response</span> <span class="o">=</span> <span class="n">supabase_client</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 
-        <span class="n">photo_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span>
-            <span class="n">file</span><span class="o">=</span><span class="n">encoded_img</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
-            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;result.jpg&quot;</span>
-        <span class="p">)</span>
+        <span class="n">photo_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">encoded_img</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;result.jpg&quot;</span><span class="p">)</span>
         <span class="k">await</span> <span class="n">processing_msg</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-        <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer_photo</span><span class="p">(</span>
-            <span class="n">photo</span><span class="o">=</span><span class="n">photo_file</span><span class="p">,</span>
-            <span class="n">caption</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;✅ Результат обработки&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer_photo</span><span class="p">(</span><span class="n">photo</span><span class="o">=</span><span class="n">photo_file</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;✅ Результат обработки&quot;</span><span class="p">))</span>
 
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">processing_msg</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>  <span class="c1"># Удаляем сообщение &quot;обрабатывается&quot; даже в случае ошибки</span>
         <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="s2">&quot;Ошибка обработки: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 
@@ -352,11 +363,9 @@
 
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
-        <span class="s2">&quot;Выберите действие:&quot;</span><span class="p">,</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">()</span>
-    <span class="p">)</span>
-    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="s2">&quot;Выберите действие:&quot;</span><span class="p">,</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">())</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">)</span></div>
+
 </pre></div>
         </article>
       </div>
