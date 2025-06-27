@@ -8,7 +8,7 @@ from pathlib import Path
 import supabase as sb
 import gettext
 
-from src.denoise_bot.routers.keyboards_buttons import language_buttons, menu_buttons
+from .keyboards_buttons import language_buttons, menu_buttons
 from .button_states import Form, DelNoise_States
 
 start = Router()

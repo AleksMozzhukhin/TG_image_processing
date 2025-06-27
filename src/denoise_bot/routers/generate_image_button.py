@@ -11,7 +11,7 @@ import supabase as sb
 import uuid
 
 from ..fusion_brain import FusionBrainAPI
-from src.denoise_bot.routers.keyboards_buttons import menu_buttons, ButtonText
+from .keyboards_buttons import menu_buttons, ButtonText
 from .button_states import Form, GenImage_States
 
 

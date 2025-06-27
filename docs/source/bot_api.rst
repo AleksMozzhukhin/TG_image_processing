@@ -30,7 +30,7 @@
 -----------------------
 Модули, определяющие внешний вид кнопок и состояния конечного автомата (FSM) для управления диалогом.
 
-.. automodule:: denoise_bot.keyboards_buttons
+.. automodule:: denoise_bot.routers.keyboards_buttons
    :members:
 
 .. automodule:: denoise_bot.routers.button_states

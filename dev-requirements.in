@@ -19,6 +19,7 @@ pytest-mock
 
 # Инструменты для сборки документации
 Sphinx
+furo
 sphinx-autobuild
 sphinx-autodoc-typehints
 
