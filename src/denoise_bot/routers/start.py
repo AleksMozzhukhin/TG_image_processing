@@ -8,7 +8,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from .button_states import Form
-from .keyboards_buttons import language_buttons, menu_buttons
 
 from aiogram.types import (
     InlineKeyboardButton,

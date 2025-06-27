@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from ..fusion_brain import FusionBrainAPI
 from .start import menu_buttons
 from .button_states import Form, GenImage_States
-from .keyboards_buttons import menu_buttons
+from .start import menu_buttons
 
 load_dotenv()
 
