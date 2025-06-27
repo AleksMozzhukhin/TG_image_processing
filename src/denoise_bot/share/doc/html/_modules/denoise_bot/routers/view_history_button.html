@@ -237,18 +237,21 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Исходный код denoise_bot.routers.view_history_button</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Router</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">F</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">CommandStart</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">InlineKeyboardButton</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.utils.keyboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReplyKeyboardBuilder</span><span class="p">,</span> <span class="n">InlineKeyboardBuilder</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">supabase</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferedInputFile</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">menu_buttons</span><span class="p">,</span> <span class="n">ButtonText</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">supabase</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">F</span><span class="p">,</span> <span class="n">Router</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BufferedInputFile</span><span class="p">,</span>
+    <span class="n">CallbackQuery</span><span class="p">,</span>
+    <span class="n">InlineKeyboardButton</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.utils.keyboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">InlineKeyboardBuilder</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.button_states</span><span class="w"> </span><span class="kn">import</span> <span class="n">Form</span><span class="p">,</span> <span class="n">History_state</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">menu_buttons</span>
 
 <span class="n">view_history</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
 
@@ -261,11 +264,13 @@
     <span class="n">user_id</span> <span class="o">=</span> <span class="n">callback</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">answer</span><span class="p">()</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">supabase_client</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span> \
-            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;id, request, created_at, image_url&quot;</span><span class="p">)</span> \
-            <span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span> \
-            <span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> \
+        <span class="n">response</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">supabase_client</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;id, request, created_at, image_url&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+        <span class="p">)</span>
 
         <span class="n">history_items</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">data</span>
         <span class="n">history_data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -276,30 +281,18 @@
 
         <span class="n">builder</span> <span class="o">=</span> <span class="n">InlineKeyboardBuilder</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">history_items</span><span class="p">:</span>
-            <span class="n">item_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
-            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;created_at&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">.%m.%Y %H:%M&quot;</span><span class="p">)</span>
+            <span class="n">item_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;created_at&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">.%m.%Y %H:%M&quot;</span><span class="p">)</span>
             <span class="n">button_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">][:]</span><span class="si">}</span><span class="s2">... (</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">[:</span><span class="mi">64</span><span class="p">]</span>
 
-            <span class="n">history_data</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;image_url&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;image_url&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;request&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span>
-            <span class="p">}</span>
+            <span class="n">history_data</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;image_url&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;image_url&quot;</span><span class="p">],</span> <span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;request&quot;</span><span class="p">]}</span>
 
-            <span class="n">builder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">InlineKeyboardButton</span><span class="p">(</span>
-                <span class="n">text</span><span class="o">=</span><span class="n">button_text</span><span class="p">,</span>
-                <span class="n">callback_data</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;show_image:</span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">))</span>
+            <span class="n">builder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">button_text</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;show_image:</span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
         <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">update_data</span><span class="p">(</span><span class="n">history_data</span><span class="o">=</span><span class="n">history_data</span><span class="p">)</span>
-        <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">InlineKeyboardButton</span><span class="p">(</span>
-            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;🚪 Выйти из истории&quot;</span><span class="p">,</span>
-            <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;exit_history&quot;</span>
-        <span class="p">))</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;🚪 Выйти из истории&quot;</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;exit_history&quot;</span><span class="p">))</span>
 
         <span class="n">builder</span><span class="o">.</span><span class="n">adjust</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
-            <span class="s2">&quot;Ваши предыдущие запросы:&quot;</span><span class="p">,</span>
-            <span class="n">reply_markup</span><span class="o">=</span><span class="n">builder</span><span class="o">.</span><span class="n">as_markup</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="s2">&quot;Ваши предыдущие запросы:&quot;</span><span class="p">,</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">builder</span><span class="o">.</span><span class="n">as_markup</span><span class="p">())</span>
         <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">History_state</span><span class="p">)</span>
         <span class="c1"># await callback.answer()</span>
 
@@ -319,7 +312,7 @@
         <span class="n">item_id</span> <span class="o">=</span> <span class="n">callback</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="n">state_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
-        <span class="n">history_data</span> <span class="o">=</span> <span class="n">state_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;history_data&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">history_data</span> <span class="o">=</span> <span class="n">state_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;history_data&quot;</span><span class="p">,</span> <span class="p">{})</span>
         <span class="n">item</span> <span class="o">=</span> <span class="n">history_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
@@ -327,16 +320,13 @@
             <span class="k">return</span>
 
         <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;image_url&#39;</span><span class="p">])</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;image_url&quot;</span><span class="p">])</span>
             <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
             <span class="n">image_data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span>
 
         <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer_photo</span><span class="p">(</span>
-            <span class="n">BufferedInputFile</span><span class="p">(</span>
-                <span class="n">file</span><span class="o">=</span><span class="n">image_data</span><span class="p">,</span>
-                <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;downloaded_image.png&quot;</span>
-            <span class="p">),</span>
-            <span class="n">caption</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;🖼️ Запрос: </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">][:</span><span class="mi">200</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">BufferedInputFile</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">image_data</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;downloaded_image.png&quot;</span><span class="p">),</span>
+            <span class="n">caption</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;🖼️ Запрос: </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">][:</span><span class="mi">200</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># builder = InlineKeyboardBuilder()</span>
         <span class="c1"># for item_id, item_data in history_data.items():</span>
@@ -369,14 +359,8 @@
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_exit_history</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Выход из режима просмотра истории&quot;&quot;&quot;</span>
     <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">answer</span><span class="p">()</span>
-    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span>
-        <span class="s2">&quot;Вы вернулись в главное меню:&quot;</span><span class="p">,</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">)</span>
-    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
-        <span class="s2">&quot;Выберите действие:&quot;</span><span class="p">,</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">()</span>
-    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span><span class="s2">&quot;Вы вернулись в главное меню:&quot;</span><span class="p">,</span> <span class="n">reply_markup</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="s2">&quot;Выберите действие:&quot;</span><span class="p">,</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">())</span>
     <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">)</span></div>
 
 </pre></div>

@@ -249,9 +249,7 @@
 
 <div class="viewcode-block" id="MC_update_X">
 <a class="viewcode-back" href="../../../ml_api.html#denoise_bot.ML_component.admm_core.MC_update_X">[документация]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">MC_update_X</span><span class="p">(</span>
-    <span class="n">Z</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="p">:</span> <span class="s2">&quot;BackendModule&quot;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MC_update_X</span><span class="p">(</span><span class="n">Z</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="p">:</span> <span class="s2">&quot;BackendModule&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Обновление матрицы X.</span>
 
@@ -281,9 +279,7 @@
 
 <div class="viewcode-block" id="MC_update_Z">
 <a class="viewcode-back" href="../../../ml_api.html#denoise_bot.ML_component.admm_core.MC_update_Z">[документация]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">MC_update_Z</span><span class="p">(</span>
-    <span class="n">X</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MC_update_Z</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">lambda_</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Обновление матрицы Z.</span>
 
@@ -351,9 +347,7 @@
 
     <span class="c1"># Инициализация истории для отслеживания сходимости</span>
     <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">compute_uv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">norm_prev</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">backend</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">backend</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-    <span class="p">)</span>
+    <span class="n">norm_prev</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">backend</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
     <span class="n">norms_history</span> <span class="o">=</span> <span class="p">[</span><span class="n">norm_prev</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iters</span><span class="p">):</span>
@@ -369,9 +363,7 @@
         <span class="c1"># Проверка сходимости по изменению ядерной нормы</span>
         <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">compute_uv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">norm_current</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">backend</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">backend</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">norm_current</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">backend</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         <span class="n">norms_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">norm_current</span><span class="p">)</span>
 
         <span class="c1"># abs() для обычных чисел Python, np.abs() для массивов</span>

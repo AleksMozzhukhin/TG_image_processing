@@ -240,10 +240,8 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">InlineKeyboardButton</span><span class="p">,</span>
     <span class="n">InlineKeyboardMarkup</span><span class="p">,</span>
-    <span class="n">KeyboardButton</span><span class="p">,</span>
-    <span class="n">ReplyKeyboardMarkup</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.utils.keyboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">InlineKeyboardBuilder</span><span class="p">,</span> <span class="n">ReplyKeyboardBuilder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.utils.keyboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">InlineKeyboardBuilder</span>
 
 
 <div class="viewcode-block" id="ButtonText">
@@ -268,20 +266,10 @@
     <span class="n">builder</span> <span class="o">=</span> <span class="n">InlineKeyboardBuilder</span><span class="p">()</span>
 
     <span class="c1"># Добавляем кнопки с callback_data</span>
-    <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
-        <span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">ButtonText</span><span class="o">.</span><span class="n">REMOVE_NOISE</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;remove_noise&quot;</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
-        <span class="n">InlineKeyboardButton</span><span class="p">(</span>
-            <span class="n">text</span><span class="o">=</span><span class="n">ButtonText</span><span class="o">.</span><span class="n">GENERATE_IMAGE</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;generate_image&quot;</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
-        <span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">ButtonText</span><span class="o">.</span><span class="n">VIEW_HISTORY</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;view_history&quot;</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
-        <span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">ButtonText</span><span class="o">.</span><span class="n">MAGIC</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;magic_action&quot;</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">ButtonText</span><span class="o">.</span><span class="n">REMOVE_NOISE</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;remove_noise&quot;</span><span class="p">))</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">ButtonText</span><span class="o">.</span><span class="n">GENERATE_IMAGE</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;generate_image&quot;</span><span class="p">))</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">ButtonText</span><span class="o">.</span><span class="n">VIEW_HISTORY</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;view_history&quot;</span><span class="p">))</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">InlineKeyboardButton</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">ButtonText</span><span class="o">.</span><span class="n">MAGIC</span><span class="p">,</span> <span class="n">callback_data</span><span class="o">=</span><span class="s2">&quot;magic_action&quot;</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">as_markup</span><span class="p">()</span></div>
 
 

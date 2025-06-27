@@ -237,38 +237,35 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Исходный код denoise_bot.routers.start</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Router</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">F</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">gettext</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">supabase</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">F</span><span class="p">,</span> <span class="n">Router</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">CommandStart</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">CallbackQuery</span> 
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span> 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span> 
-<span class="kn">import</span><span class="w"> </span><span class="nn">supabase</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">gettext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">Message</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.button_states</span><span class="w"> </span><span class="kn">import</span> <span class="n">Form</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.keyboards_buttons</span><span class="w"> </span><span class="kn">import</span> <span class="n">language_buttons</span><span class="p">,</span> <span class="n">menu_buttons</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.button_states</span><span class="w"> </span><span class="kn">import</span> <span class="n">Form</span><span class="p">,</span> <span class="n">DelNoise_States</span>
 
 <span class="n">start</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
 
-<span class="n">locales_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;locales&#39;</span><span class="p">)</span>
+<span class="n">locales_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;locales&quot;</span><span class="p">)</span>
 <span class="n">translation</span> <span class="o">=</span> <span class="n">gettext</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="s2">&quot;translations&quot;</span><span class="p">,</span> <span class="n">localedir</span><span class="o">=</span><span class="n">locales_path</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">_</span><span class="p">,</span> <span class="n">ngettext</span> <span class="o">=</span> <span class="n">translation</span><span class="o">.</span><span class="n">gettext</span><span class="p">,</span> <span class="n">translation</span><span class="o">.</span><span class="n">ngettext</span>
 <span class="n">user_langs</span> <span class="o">=</span> <span class="p">{}</span>
+
 
 <div class="viewcode-block" id="set_locale">
 <a class="viewcode-back" href="../../../bot_api.html#denoise_bot.routers.start.set_locale">[документация]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">set_locale</span><span class="p">(</span><span class="n">locale_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set locale for particular user.&quot;&quot;&quot;</span>
-    <span class="n">locales_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;locales&#39;</span><span class="p">)</span>
+    <span class="n">locales_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;locales&quot;</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">translation</span> <span class="o">=</span> <span class="n">gettext</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span>
-            <span class="s2">&quot;translations&quot;</span><span class="p">,</span>
-            <span class="n">localedir</span><span class="o">=</span><span class="n">locales_path</span><span class="p">,</span>
-            <span class="n">languages</span><span class="o">=</span><span class="p">[</span><span class="n">locale_name</span><span class="p">],</span>
-            <span class="n">fallback</span><span class="o">=</span><span class="kc">True</span>
+            <span class="s2">&quot;translations&quot;</span><span class="p">,</span> <span class="n">localedir</span><span class="o">=</span><span class="n">locales_path</span><span class="p">,</span> <span class="n">languages</span><span class="o">=</span><span class="p">[</span><span class="n">locale_name</span><span class="p">],</span> <span class="n">fallback</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
         <span class="n">translation</span><span class="o">.</span><span class="n">install</span><span class="p">()</span>
         <span class="k">global</span> <span class="n">_</span>
@@ -287,9 +284,7 @@
 <div class="viewcode-block" id="command_start">
 <a class="viewcode-back" href="../../../bot_api.html#denoise_bot.routers.start.command_start">[документация]</a>
 <span class="nd">@start</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">CommandStart</span><span class="p">())</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">command_start</span><span class="p">(</span>
-    <span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">,</span> <span class="n">supabase_client</span><span class="p">:</span> <span class="n">sb</span><span class="o">.</span><span class="n">Client</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">command_start</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">,</span> <span class="n">supabase_client</span><span class="p">:</span> <span class="n">sb</span><span class="o">.</span><span class="n">Client</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Обработка команды /start - сначала выбор языка.&quot;&quot;&quot;</span>
     <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">set_language</span><span class="p">)</span>
     <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
@@ -302,22 +297,14 @@
 <div class="viewcode-block" id="process_language_selection">
 <a class="viewcode-back" href="../../../bot_api.html#denoise_bot.routers.start.process_language_selection">[документация]</a>
 <span class="nd">@start</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">set_language</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;lang_&quot;</span><span class="p">))</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_language_selection</span><span class="p">(</span>
-    <span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">,</span> <span class="n">supabase_client</span><span class="p">:</span> <span class="n">sb</span><span class="o">.</span><span class="n">Client</span>
-<span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_language_selection</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">,</span> <span class="n">supabase_client</span><span class="p">:</span> <span class="n">sb</span><span class="o">.</span><span class="n">Client</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Обработка выбора языка.&quot;&quot;&quot;</span>
     <span class="n">language</span> <span class="o">=</span> <span class="n">callback</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">user_langs</span><span class="p">[</span><span class="n">callback</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">language</span>
     <span class="n">set_locale</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
 
-    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span>
-        <span class="n">text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Выбран русский язык&quot;</span><span class="p">),</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">)</span>
-    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
-        <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Выберите действие:&quot;</span><span class="p">),</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">()</span>
-    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Выбран русский язык&quot;</span><span class="p">),</span> <span class="n">reply_markup</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Выберите действие:&quot;</span><span class="p">),</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">())</span>
 
     <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Form</span><span class="o">.</span><span class="n">is_choosing</span><span class="p">)</span>
     <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">answer</span><span class="p">()</span></div>
@@ -330,10 +317,7 @@
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show_main_menu</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Показ главного меню по текстовому сообщению от пользователя.&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;_SHOW MAIN MENU_&quot;</span><span class="p">)</span>
-    <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
-        <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Выберите действие:&quot;</span><span class="p">),</span>
-        <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">()</span>
-    <span class="p">)</span></div>
+    <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Выберите действие:&quot;</span><span class="p">),</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">menu_buttons</span><span class="p">())</span></div>
 
 </pre></div>
         </article>
