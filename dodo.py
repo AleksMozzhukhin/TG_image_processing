@@ -1,6 +1,5 @@
-import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 # --- Конфигурация путей ---
 ROOT_DIR = Path(__file__).parent
@@ -23,14 +22,12 @@ def copy_dir(src, dst):
     shutil.copytree(src, dst, dirs_exist_ok=True)
     return True
 
+
 def task_cleanup():
     """Очистка всех артефактов сборки (папок build, dist, .egg-info и т.д.)."""
+
     def clean_func():
-        patterns_to_remove = [
-            "build", "dist",
-            str(SRC_DIR / "*.egg-info"),
-            str(PKG_DIR / "share")
-        ]
+        patterns_to_remove = ["build", "dist", str(SRC_DIR / "*.egg-info"), str(PKG_DIR / "share")]
         for pattern in patterns_to_remove:
             for path in ROOT_DIR.glob(pattern):
                 if path.is_dir():
@@ -40,10 +37,7 @@ def task_cleanup():
                     path.unlink()
                     print(f"Removed file: {path}")
 
-    return {
-        "actions": [clean_func],
-        "doc": "Очистить все артефакты сборки."
-    }
+    return {"actions": [clean_func], "doc": "Очистить все артефакты сборки."}
 
 
 def task_docs():
@@ -55,7 +49,6 @@ def task_docs():
         "actions": [
             # 1. Собрать документацию (оставляем как есть)
             f"sphinx-build -b html {DOCS_DIR / 'source'} {build_dir}",
-
             (copy_dir, [build_dir, target_dir]),
         ],
         "file_dep": list((DOCS_DIR / "source").glob("**/*.rst")) + [DOCS_DIR / "source" / "conf.py"],
@@ -72,7 +65,7 @@ def task_i18n_compile():
         "actions": [f"pybabel compile -D {DOMAIN} -d {LOCALES_DIR} -f"],
         "file_dep": po_files,
         "targets": [p.with_suffix(".mo") for p in po_files],
-        "doc": "Скомпилировать переводы в .mo файлы."
+        "doc": "Скомпилировать переводы в .mo файлы.",
     }
 
 
@@ -96,5 +89,5 @@ def task_test():
 
 # --- Настройка задач по умолчанию ---
 DOIT_CONFIG = {
-    'default_tasks': ['build'],
+    "default_tasks": ["build"],
 }

@@ -43,9 +43,7 @@ def get_backend(use_gpu: bool = True) -> "BackendModule":
         return cp
     else:
         if use_gpu and not CUPY_AVAILABLE:
-            print(
-                "Предупреждение: Запрошен GPU, но CuPy не найден. Используется CPU (NumPy)."
-            )
+            print("Предупреждение: Запрошен GPU, но CuPy не найден. Используется CPU (NumPy).")
         print("CPU (NumPy) выбран в качестве бэкенда.")
         return np
 
@@ -117,9 +115,7 @@ def load_image(source: Union[str, IO[bytes]], normalize: bool = True) -> np.ndar
     if isinstance(source, str):
         image = cv2.imread(source)
         if image is None:
-            raise FileNotFoundError(
-                f"Не удалось загрузить изображение по пути: {source}"
-            )
+            raise FileNotFoundError(f"Не удалось загрузить изображение по пути: {source}")
     else:
         # Если это байтовый поток, читаем его в NumPy массив
         file_bytes = np.frombuffer(source.read(), np.uint8)
@@ -137,9 +133,7 @@ def load_image(source: Union[str, IO[bytes]], normalize: bool = True) -> np.ndar
     return image_rgb
 
 
-def generate_mask(
-    shape: Tuple[int, int], known_pixel_ratio: float, seed: int = 42
-) -> np.ndarray:
+def generate_mask(shape: Tuple[int, int], known_pixel_ratio: float, seed: int = 42) -> np.ndarray:
     """
     Генерирует бинарную NumPy маску, где True означает известный пиксель.
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-06-27 04:04+0300\n"
+"POT-Creation-Date: 2025-06-27 10:35+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,7 +31,7 @@ msgstr ""
 
 #: src/denoise_bot/routers/generate_image_button.py:87
 #, python-brace-format
-msgid "Произошла ошибка при обработке: {error}"
+msgid "Произошла ошибка при обработке: {}"
 msgstr ""
 
 #: src/denoise_bot/routers/generate_image_button.py:90
@@ -52,7 +52,7 @@ msgid "Произошла ошибка при загрузке котиков �
 msgstr ""
 
 #: src/denoise_bot/routers/remove_noise_button.py:24
-msgid "Загрузите вышу картинку"
+msgid "Загрузите вашу картинку"
 msgstr ""
 
 #: src/denoise_bot/routers/remove_noise_button.py:36

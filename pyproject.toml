@@ -64,11 +64,26 @@ packages = {find = {where = ["src"]}}
 
 [tool.isort]
 profile = "black"
-line-length = 120
+skip = [
+    ".git", ".hg", ".mypy_cache", ".tox",
+    ".venv", ".venv_linux", "_build", "build", "dist",
+    "tests/test_assets",
+    "src/denoise_bot/generated",
+]
 
 [tool.black]
 line-length = 120
 target-version = ['py312']
+exclude = '''
+(
+    /(
+        \.git|\.hg|\.mypy_cache|\.tox|\.venv.*|
+        _build|buck-out|build|dist
+    )/
+    | /tests/test_assets/
+    | /src/denoise_bot/generated/
+)
+'''
 
 
 [tool.pydocstyle]
@@ -94,6 +109,6 @@ max-line-length = 120
 
 max-doc-length = 120
 
-ignore = ["E203", "W503", "D100", "D400"]
+ignore = ["E203", "W503", "D100", "D400", "F821", "F841"]
 
 max-complexity = 10

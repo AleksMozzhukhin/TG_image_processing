@@ -1,12 +1,12 @@
 import os
 import random
-from aiogram.types import FSInputFile
-from aiogram import F, Router
-from aiogram.types import Message, CallbackQuery
-from aiogram.fsm.context import FSMContext
 
-from .keyboards_buttons import ButtonText, menu_buttons
+from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, FSInputFile
+
 from .button_states import Form
+from .keyboards_buttons import menu_buttons
 
 magic = Router()
 
@@ -26,14 +26,14 @@ CUTE_CAPTIONS = [
     "Мурчание передается через фото!",
 ]
 
+
 @magic.callback_query(Form.is_choosing, F.data.startswith("magic_action"))
 async def handle_magic_button(callback: CallbackQuery, state: FSMContext) -> None:
     """Обработчик нажатия на кнопку - отправляет котиков сразу"""
     await callback.answer()
-    
+
     try:
-        cat_images = [f for f in os.listdir(CATS_IMAGES_DIR) 
-                     if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+        cat_images = [f for f in os.listdir(CATS_IMAGES_DIR) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
 
         if not cat_images:
             await callback.message.answer(_("Котики куда-то убежали... Попробуйте позже!"))
@@ -47,9 +47,8 @@ async def handle_magic_button(callback: CallbackQuery, state: FSMContext) -> Non
             caption = random.choice(CUTE_CAPTIONS)
             photo = FSInputFile(image_path)
             await callback.message.answer_photo(photo, caption=caption)
-        
-        await callback.message.answer(_("Вот ваша порция котиков! 😊"),
-                             reply_markup=menu_buttons())
+
+        await callback.message.answer(_("Вот ваша порция котиков! 😊"), reply_markup=menu_buttons())
 
         await state.set_state(Form.is_choosing)
 

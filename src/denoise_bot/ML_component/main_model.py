@@ -6,9 +6,7 @@ import numpy as np
 from . import admm_core, utils, visualize
 
 
-def create_mask_from_damaged(
-    damaged_image: np.ndarray, threshold: int = 10
-) -> np.ndarray:
+def create_mask_from_damaged(damaged_image: np.ndarray, threshold: int = 10) -> np.ndarray:
     """
     Отвечает за создание маски для матрицы.
 
@@ -101,9 +99,7 @@ def run_inpainting_pipeline(
         print("Создание маски на основе поврежденного изображения...")
         mask_np = create_mask_from_damaged(damaged_image_np)
 
-        print(
-            f"Передача данных на выбранный бэкенд ({'GPU' if backend is not np else 'CPU'})..."
-        )
+        print(f"Передача данных на выбранный бэкенд ({'GPU' if backend is not np else 'CPU'})...")
         image_to_recover = utils.as_backend_array(damaged_image_np, backend)
         mask = utils.as_backend_array(mask_np, backend)
 

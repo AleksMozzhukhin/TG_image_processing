@@ -8,9 +8,7 @@ except ImportError:
     pass
 
 
-def MC_update_X(
-    Z: "ArrayLike", lambda_: "ArrayLike", r: float, np: "BackendModule"
-) -> "ArrayLike":
+def MC_update_X(Z: "ArrayLike", lambda_: "ArrayLike", r: float, np: "BackendModule") -> "ArrayLike":
     """
     Обновление матрицы X.
 
@@ -37,9 +35,7 @@ def MC_update_X(
     return u @ np.diag(s_thresholded) @ vt
 
 
-def MC_update_Z(
-    X: "ArrayLike", lambda_: "ArrayLike", r: float, Y: "ArrayLike", mask: "ArrayLike"
-) -> "ArrayLike":
+def MC_update_Z(X: "ArrayLike", lambda_: "ArrayLike", r: float, Y: "ArrayLike", mask: "ArrayLike") -> "ArrayLike":
     """
     Обновление матрицы Z.
 
@@ -104,9 +100,7 @@ def MC_ADMM(
 
     # Инициализация истории для отслеживания сходимости
     u, s, v = backend.linalg.svd(X, compute_uv=True)
-    norm_prev = (
-        backend.sum(s).get().item() if hasattr(s, "get") else backend.sum(s).item()
-    )
+    norm_prev = backend.sum(s).get().item() if hasattr(s, "get") else backend.sum(s).item()
     norms_history = [norm_prev]
 
     for i in range(max_iters):
@@ -122,9 +116,7 @@ def MC_ADMM(
         # Проверка сходимости по изменению ядерной нормы
         u, s, v = backend.linalg.svd(X, compute_uv=True)
 
-        norm_current = (
-            backend.sum(s).get().item() if hasattr(s, "get") else backend.sum(s).item()
-        )
+        norm_current = backend.sum(s).get().item() if hasattr(s, "get") else backend.sum(s).item()
         norms_history.append(norm_current)
 
         # abs() для обычных чисел Python, np.abs() для массивов

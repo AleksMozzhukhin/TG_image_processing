@@ -1,10 +1,8 @@
 from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    KeyboardButton,
-    ReplyKeyboardMarkup,
 )
-from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 class ButtonText:
@@ -24,20 +22,10 @@ def menu_buttons() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     # Добавляем кнопки с callback_data
-    builder.row(
-        InlineKeyboardButton(text=ButtonText.REMOVE_NOISE, callback_data="remove_noise")
-    )
-    builder.row(
-        InlineKeyboardButton(
-            text=ButtonText.GENERATE_IMAGE, callback_data="generate_image"
-        )
-    )
-    builder.row(
-        InlineKeyboardButton(text=ButtonText.VIEW_HISTORY, callback_data="view_history")
-    )
-    builder.row(
-        InlineKeyboardButton(text=ButtonText.MAGIC, callback_data="magic_action")
-    )
+    builder.row(InlineKeyboardButton(text=ButtonText.REMOVE_NOISE, callback_data="remove_noise"))
+    builder.row(InlineKeyboardButton(text=ButtonText.GENERATE_IMAGE, callback_data="generate_image"))
+    builder.row(InlineKeyboardButton(text=ButtonText.VIEW_HISTORY, callback_data="view_history"))
+    builder.row(InlineKeyboardButton(text=ButtonText.MAGIC, callback_data="magic_action"))
     return builder.as_markup()
 
 

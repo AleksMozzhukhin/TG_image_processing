@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-06-27 04:04+0300\n"
+"POT-Creation-Date: 2025-06-27 10:35+0300\n"
 "PO-Revision-Date: 2025-06-27 04:12+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
@@ -32,7 +32,7 @@ msgstr "Your image is ready!"
 
 #: src/denoise_bot/routers/generate_image_button.py:87
 #, fuzzy, python-brace-format
-msgid "Произошла ошибка при обработке: {error}"
+msgid "Произошла ошибка при обработке: {}"
 msgstr "An error occurred while processing: {}"
 
 #: src/denoise_bot/routers/generate_image_button.py:90
@@ -54,7 +54,7 @@ msgstr "There was an error loading cats 😿"
 
 #: src/denoise_bot/routers/remove_noise_button.py:24
 #, fuzzy
-msgid "Загрузите вышу картинку"
+msgid "Загрузите вашу картинку"
 msgstr "Upload your picture"
 
 #: src/denoise_bot/routers/remove_noise_button.py:36

@@ -1,33 +1,30 @@
-from aiogram import Router, html, F
+import gettext
+import os
+
+import supabase as sb
+from aiogram import F, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery 
-import os
-import sys 
-from pathlib import Path 
-import supabase as sb
-import gettext
+from aiogram.types import CallbackQuery, Message
 
+from .button_states import Form
 from .keyboards_buttons import language_buttons, menu_buttons
-from .button_states import Form, DelNoise_States
 
 start = Router()
 
-locales_path = os.path.join(os.path.dirname(__file__), 'locales')
+locales_path = os.path.join(os.path.dirname(__file__), "locales")
 translation = gettext.translation("translations", localedir=locales_path, fallback=True)
 _, ngettext = translation.gettext, translation.ngettext
 user_langs = {}
 
+
 def set_locale(locale_name):
     """Set locale for particular user."""
-    locales_path = os.path.join(os.path.dirname(__file__), 'locales')
+    locales_path = os.path.join(os.path.dirname(__file__), "locales")
 
     try:
         translation = gettext.translation(
-            "translations",
-            localedir=locales_path,
-            languages=[locale_name],
-            fallback=True
+            "translations", localedir=locales_path, languages=[locale_name], fallback=True
         )
         translation.install()
         global _
@@ -43,9 +40,7 @@ def set_locale(locale_name):
 
 
 @start.message(CommandStart())
-async def command_start(
-    message: Message, state: FSMContext, supabase_client: sb.Client
-) -> None:
+async def command_start(message: Message, state: FSMContext, supabase_client: sb.Client) -> None:
     """Обработка команды /start - сначала выбор языка."""
     await state.set_state(Form.set_language)
     await message.answer(
@@ -55,22 +50,14 @@ async def command_start(
 
 
 @start.callback_query(Form.set_language, F.data.startswith("lang_"))
-async def process_language_selection(
-    callback: CallbackQuery, state: FSMContext, supabase_client: sb.Client
-):
+async def process_language_selection(callback: CallbackQuery, state: FSMContext, supabase_client: sb.Client):
     """Обработка выбора языка."""
     language = callback.data.split("_")[1]
     user_langs[callback.from_user.id] = language
     set_locale(language)
 
-    await callback.message.edit_text(
-        text=_("Выбран русский язык"),
-        reply_markup=None
-    )
-    await callback.message.answer(
-        _("Выберите действие:"),
-        reply_markup=menu_buttons()
-    )
+    await callback.message.edit_text(text=_("Выбран русский язык"), reply_markup=None)
+    await callback.message.answer(_("Выберите действие:"), reply_markup=menu_buttons())
 
     await state.set_state(Form.is_choosing)
     await callback.answer()
@@ -80,7 +67,4 @@ async def process_language_selection(
 async def show_main_menu(message: Message):
     """Показ главного меню по текстовому сообщению от пользователя."""
     print("_SHOW MAIN MENU_")
-    await message.answer(
-        _("Выберите действие:"),
-        reply_markup=menu_buttons()
-    )
+    await message.answer(_("Выберите действие:"), reply_markup=menu_buttons())

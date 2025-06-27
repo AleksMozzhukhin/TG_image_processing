@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 from denoise_bot.ML_component import admm_core
 
 try:
@@ -7,11 +8,11 @@ try:
 
     CUPY_AVAILABLE = True
     backends = [np, cp]
-    backend_ids = ['numpy', 'cupy']
+    backend_ids = ["numpy", "cupy"]
 except ImportError:
     CUPY_AVAILABLE = False
     backends = [np]
-    backend_ids = ['numpy']
+    backend_ids = ["numpy"]
 
 
 # Фикстура для параметризации тестов по бэкендам (CPU/GPU)
@@ -23,9 +24,11 @@ def backend(request):
 
 # --- Тесты для MC_update_X ---
 
+
 def test_mc_update_x(backend):
     """
     Проверяет шаг обновления X.
+
     Создает матрицу, где после вычитания lambda/r одно сингулярное значение
     должно обнулиться, а другое - уменьшиться.
     """
@@ -47,9 +50,7 @@ def test_mc_update_x(backend):
 
 
 def test_mc_update_x_high_threshold(backend):
-    """
-    Проверяет, что при высоком пороге (маленьком r) матрица X становится нулевой.
-    """
+    """Проверяет, что при высоком пороге (маленьком r) матрица X становится нулевой."""
     # Arrange
     Z = backend.random.rand(5, 5)
     lambda_ = backend.zeros_like(Z)
@@ -64,24 +65,22 @@ def test_mc_update_x_high_threshold(backend):
 
 # --- Тесты для MC_update_Z ---
 
+
 def test_mc_update_z(backend):
     """
-    Проверяет шаг обновления Z, который должен сохранять значения
-    из Y на позициях, указанных в маске.
+    Проверяет шаг обновления Z.
+
+    Шаг Z должен сохранять значения из Y на позициях, указанных в маске.
     """
     # Arrange
     X = backend.ones((3, 3))
     lambda_ = backend.full((3, 3), 2.0)
     r = 1.0
     Y = backend.full((3, 3), 99.0)
-    mask = backend.array([[True, False, True],
-                          [False, True, False],
-                          [True, False, True]], dtype=bool)
+    mask = backend.array([[True, False, True], [False, True, False], [True, False, True]], dtype=bool)
 
     # Вне маски ожидаем X + lambda_/r = 1.0 + 2.0/1.0 = 3.0
-    expected_Z = backend.array([[99.0, 3.0, 99.0],
-                                [3.0, 99.0, 3.0],
-                                [99.0, 3.0, 99.0]])
+    expected_Z = backend.array([[99.0, 3.0, 99.0], [3.0, 99.0, 3.0], [99.0, 3.0, 99.0]])
 
     # Act
     Z_new = admm_core.MC_update_Z(X, lambda_, r, Y, mask)
@@ -92,9 +91,11 @@ def test_mc_update_z(backend):
 
 # --- Тесты для MC_ADMM (интеграционный тест) ---
 
+
 def test_mc_admm_low_rank_recovery(backend):
     """
     Интеграционный тест для всего алгоритма ADMM.
+
     Создаем низкоранговую матрицу, "портим" ее, удаляя часть пикселей,
     и проверяем, сможет ли алгоритм ее восстановить.
     """
@@ -114,14 +115,7 @@ def test_mc_admm_low_rank_recovery(backend):
     Y[~mask] = 0  # Зануляем пиксели вне маски
 
     # 3. Запускаем ADMM
-    recovered_X, history = admm_core.MC_ADMM(
-        Y=Y,
-        mask=mask,
-        tol=1e-4,
-        max_iters=50,
-        r=1.0,
-        backend=backend
-    )
+    recovered_X, history = admm_core.MC_ADMM(Y=Y, mask=mask, tol=1e-4, max_iters=50, r=1.0, backend=backend)
 
     # Assert
     assert isinstance(history, list)

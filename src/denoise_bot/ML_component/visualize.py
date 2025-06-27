@@ -35,10 +35,10 @@ def show_image(ax: plt.Axes, image: "ArrayLike", title: str = "", grid: bool = F
 
 
 def save_results_comparison(
-        original: "ArrayLike",
-        damaged: "ArrayLike",
-        recovered: "ArrayLike",
-        output_path: str,
+    original: "ArrayLike",
+    damaged: "ArrayLike",
+    recovered: "ArrayLike",
+    output_path: str,
 ):
     """
     Сохранение сравнение результатов.
@@ -72,10 +72,10 @@ def save_results_comparison(
 
 
 def save_convergence_plot(
-        norm_histories: List[List[float]],
-        titles: List[str],
-        colors: List[str],
-        output_path: str,
+    norm_histories: List[List[float]],
+    titles: List[str],
+    colors: List[str],
+    output_path: str,
 ):
     """
     Сохраняет графики сходимости ядерной нормы для каждого канала в файл.

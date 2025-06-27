@@ -1,15 +1,18 @@
-from aiogram import Router, html, F
-from aiogram.filters import CommandStart
-from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 import datetime
-import supabase as sb
-import httpx
-from aiogram.types import BufferedInputFile
 
-from .keyboards_buttons import menu_buttons, ButtonText
+import httpx
+import supabase as sb
+from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.types import (
+    BufferedInputFile,
+    CallbackQuery,
+    InlineKeyboardButton,
+)
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from .button_states import Form, History_state
+from .keyboards_buttons import menu_buttons
 
 view_history = Router()
 
@@ -20,11 +23,13 @@ async def handle_view_history(callback: CallbackQuery, state: FSMContext, supaba
     user_id = callback.from_user.id
     try:
         await callback.answer()
-        response = supabase_client.table("images") \
-            .select("id, request, created_at, image_url") \
-            .eq("user_id", user_id) \
-            .order("created_at", desc=True) \
+        response = (
+            supabase_client.table("images")
+            .select("id, request, created_at, image_url")
+            .eq("user_id", user_id)
+            .order("created_at", desc=True)
             .execute()
+        )
 
         history_items = response.data
         history_data = {}
@@ -35,30 +40,18 @@ async def handle_view_history(callback: CallbackQuery, state: FSMContext, supaba
 
         builder = InlineKeyboardBuilder()
         for item in history_items:
-            item_id = str(item['id'])
-            timestamp = datetime.datetime.fromisoformat(item['created_at']).strftime("%d.%m.%Y %H:%M")
+            item_id = str(item["id"])
+            timestamp = datetime.datetime.fromisoformat(item["created_at"]).strftime("%d.%m.%Y %H:%M")
             button_text = f"{item['request'][:]}... ({timestamp})"[:64]
 
-            history_data[item_id] = {
-                'image_url': item['image_url'],
-                'request': item['request']
-            }
+            history_data[item_id] = {"image_url": item["image_url"], "request": item["request"]}
 
-            builder.add(InlineKeyboardButton(
-                text=button_text,
-                callback_data=f"show_image:{item_id}"
-            ))
+            builder.add(InlineKeyboardButton(text=button_text, callback_data=f"show_image:{item_id}"))
         await state.update_data(history_data=history_data)
-        builder.row(InlineKeyboardButton(
-            text="🚪 Выйти из истории",
-            callback_data="exit_history"
-        ))
+        builder.row(InlineKeyboardButton(text="🚪 Выйти из истории", callback_data="exit_history"))
 
         builder.adjust(1)
-        await callback.message.answer(
-            "Ваши предыдущие запросы:",
-            reply_markup=builder.as_markup()
-        )
+        await callback.message.answer("Ваши предыдущие запросы:", reply_markup=builder.as_markup())
         await state.set_state(History_state)
         # await callback.answer()
 
@@ -75,7 +68,7 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
         item_id = callback.data.split(":")[1]
 
         state_data = await state.get_data()
-        history_data = state_data.get('history_data', {})
+        history_data = state_data.get("history_data", {})
         item = history_data.get(item_id)
 
         if not item:
@@ -83,16 +76,13 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
             return
 
         async with httpx.AsyncClient() as client:
-            response = await client.get(item['image_url'])
+            response = await client.get(item["image_url"])
             response.raise_for_status()
             image_data = response.content
 
         await callback.message.answer_photo(
-            BufferedInputFile(
-                file=image_data,
-                filename="downloaded_image.png"
-            ),
-            caption=f"🖼️ Запрос: {item['request'][:200]}"
+            BufferedInputFile(file=image_data, filename="downloaded_image.png"),
+            caption=f"🖼️ Запрос: {item['request'][:200]}",
         )
         # builder = InlineKeyboardBuilder()
         # for item_id, item_data in history_data.items():
@@ -122,12 +112,6 @@ async def handle_history_select(callback: CallbackQuery, state: FSMContext):
 async def handle_exit_history(callback: CallbackQuery, state: FSMContext):
     """Выход из режима просмотра истории"""
     await callback.answer()
-    await callback.message.edit_text(
-        "Вы вернулись в главное меню:",
-        reply_markup=None
-    )
-    await callback.message.answer(
-        "Выберите действие:",
-        reply_markup=menu_buttons()
-    )
+    await callback.message.edit_text("Вы вернулись в главное меню:", reply_markup=None)
+    await callback.message.answer("Выберите действие:", reply_markup=menu_buttons())
     await state.set_state(Form.is_choosing)
